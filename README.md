@@ -74,3 +74,83 @@
 ## 支持作者
 
 如果你喜欢这个模组，觉得它给你的 Minecraft 之旅增添了乐趣，欢迎请作者喝杯咖啡！你的支持是我继续开发的动力 ❤️
+
+## 关于mod
+
+本模组代码由 AI 辅助生成，虽然作者会尽力确保代码质量，但难免存在疏漏。如遇到 bug 或兼容性问题，欢迎在 GitHub 提 Issue 反馈，作者会尽快处理！
+
+---
+
+# English Version
+
+## Introduction
+
+FuZhou Plan is a Minecraft Forge mod that adds practical items and plants to the game.
+
+In this mod, you'll have the ability to control and collect creatures. Don't want that zombie to escape? Ha! Use the anesthetic to immobilize creatures for 5 seconds.
+
+**Note: This mod is in early development stage, with no specific storyline or content. Compatibility issues may occur.**
+
+---
+
+## Items
+
+### Syringe
+A basic material used to craft anesthetics.
+
+**Recipe**: Glass + Iron Nugget × 2
+
+### Bio Anesthetic
+A powerful anesthetic that immobilizes creatures for 5 seconds when used.
+
+- Only effective on creatures with max health ≤ 30 (stronger creatures cannot be anesthetized)
+- Only works on Mob-type entities (players, armor stands, etc. are unaffected)
+- Already anesthetized creatures won't be affected again
+- Plays glass breaking sound when used
+- Stackable up to 16
+
+### Green Berry
+A refreshing small fruit that can be eaten or planted.
+
+- Restores 2 hunger points when eaten
+- Causes 5 seconds of nausea effect
+- Right-click on grass block or dirt to plant a berry bush
+
+---
+
+## Blocks
+
+### Green Berry Bush
+A small shrub that grows in plains, yielding green berries when mature.
+
+- Naturally generates in plains biomes
+- Has 4 growth stages (AGE_3 property, 0-3)
+- Requires light level ≥ 9 above to grow
+- 20% random growth chance
+- Right-click to harvest 1-2 green berries when mature (stage 2-3)
+- Resets to stage 1 after harvest, can be picked continuously
+- Can be accelerated with bone meal
+- Smaller hitbox when young, larger when mature
+
+---
+
+## Installation
+
+- Requires installation on both client and server
+- Requires Minecraft 1.20.1 and Forge 47.x
+
+---
+
+## License
+
+This project is open-sourced under the MIT License. See [LICENSE](LICENSE) file for details.
+
+---
+
+## Support the Author
+
+If you like this mod and it adds fun to your Minecraft journey, consider buying the author a coffee! Your support is my motivation to keep developing ❤️
+
+## About the Mod
+
+This mod's code is AI-assisted. While the author strives to ensure code quality, oversights may occur. If you encounter bugs or compatibility issues, feel free to submit an Issue on GitHub, and the author will address it as soon as possible!
