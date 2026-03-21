@@ -1,0 +1,16 @@
+{
+  "itemGroup.fuzhouplan": "浮舟计划",
+  "item.fuzhouplan.syringe": "针管",
+  "item.fuzhouplan.syringe.tooltip": "用于制作麻醉剂的基础材料",
+  "item.fuzhouplan.green_berry": "绿浆果",
+  "item.fuzhouplan.green_berry.tooltip": "一种清新的小果实，但会引起反胃",
+  "block.fuzhouplan.green_berry_bush": "绿浆果丛",
+  "item.fuzhouplan.bio_anesthetic": "生物麻醉剂",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line1": "一种强效麻醉剂，可使生物定身。",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line2": "仅对最大生命值 ≤ %s 的生物有效",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line3": "持续时间：5秒",
+  "item.fuzhouplan.bio_anesthetic.too_strong": "这个生物太强了，无法麻醉！",
+  "item.fuzhouplan.bio_anesthetic.not_mob": "这只能对生物使用！",
+  "item.fuzhouplan.bio_anesthetic.already_anesthetized": "这个生物已经被麻醉了！",
+  "item.fuzhouplan.bio_anesthetic.success": "成功麻醉了生物！"
+}

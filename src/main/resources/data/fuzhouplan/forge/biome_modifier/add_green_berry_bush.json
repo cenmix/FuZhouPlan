@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_plains",
+  "features": "fuzhouplan:green_berry_bush",
+  "step": "vegetal_decoration"
+}

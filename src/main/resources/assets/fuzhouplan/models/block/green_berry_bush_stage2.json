@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "fuzhouplan:block/green_berry_bush_stage2"
+  }
+}

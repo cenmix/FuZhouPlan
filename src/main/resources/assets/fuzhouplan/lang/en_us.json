@@ -1,0 +1,16 @@
+{
+  "itemGroup.fuzhouplan": "FuZhou Plan",
+  "item.fuzhouplan.syringe": "Syringe",
+  "item.fuzhouplan.syringe.tooltip": "Basic material for making anesthetics",
+  "item.fuzhouplan.green_berry": "Green Berry",
+  "item.fuzhouplan.green_berry.tooltip": "A fresh small fruit, but causes nausea",
+  "block.fuzhouplan.green_berry_bush": "Green Berry Bush",
+  "item.fuzhouplan.bio_anesthetic": "Bio Anesthetic",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line1": "A powerful anesthetic for immobilizing creatures.",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line2": "Only works on creatures with max health ≤ %s",
+  "item.fuzhouplan.bio_anesthetic.tooltip.line3": "Duration: 5 seconds",
+  "item.fuzhouplan.bio_anesthetic.too_strong": "This creature is too strong to anesthetize!",
+  "item.fuzhouplan.bio_anesthetic.not_mob": "This can only be used on mobs!",
+  "item.fuzhouplan.bio_anesthetic.already_anesthetized": "This creature is already anesthetized!",
+  "item.fuzhouplan.bio_anesthetic.success": "Creature anesthetized successfully!"
+}

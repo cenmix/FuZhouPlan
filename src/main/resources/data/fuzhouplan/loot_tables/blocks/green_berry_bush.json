@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fuzhouplan:green_berry",
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "fuzhouplan:green_berry_bush",
+                  "properties": {
+                    "age": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fuzhouplan:green_berry",
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "fuzhouplan:green_berry_bush",
+                  "properties": {
+                    "age": "2"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
