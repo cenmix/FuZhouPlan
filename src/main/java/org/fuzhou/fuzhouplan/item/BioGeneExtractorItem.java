@@ -1,9 +1,7 @@
 package org.fuzhou.fuzhouplan.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -15,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 
@@ -26,9 +23,6 @@ import java.util.List;
  * 用于从麻醉状态的生物中提取基因样本
  */
 public class BioGeneExtractorItem extends Item {
-
-    private static final String NBT_ENTITY_TYPE = "EntityType";
-    private static final String NBT_ENTITY_NAME = "EntityName";
 
     public BioGeneExtractorItem(Properties properties) {
         super(properties.stacksTo(1));
@@ -112,36 +106,14 @@ public class BioGeneExtractorItem extends Item {
     }
 
     /**
-     * 创建带有生物基因信息的未解析DNA储存罐
+     * 创建对应生物的未解析DNA储存罐
      */
     private ItemStack createGeneSample(Mob mob) {
-        ItemStack resultStack = new ItemStack(Fuzhouplan.UNRESOLVED_DNA_CAN.get());
-
-        CompoundTag tag = new CompoundTag();
-
-        // 存储生物类型
-        ResourceLocation entityType = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType());
-        if (entityType != null) {
-            tag.putString(NBT_ENTITY_TYPE, entityType.toString());
+        Item unresolvedDnaCanItem = DnaCanManager.getUnresolvedDnaCan(mob.getType());
+        if (unresolvedDnaCanItem == null) {
+            return ItemStack.EMPTY;
         }
-
-        // 存储生物名称
-        Component customName = mob.getCustomName();
-        if (customName != null) {
-            tag.putString(NBT_ENTITY_NAME, Component.Serializer.toJson(customName));
-        } else {
-            // 使用生物的默认显示名称
-            tag.putString(NBT_ENTITY_NAME, Component.Serializer.toJson(mob.getDisplayName()));
-        }
-
-        resultStack.setTag(tag);
-
-        // 设置显示名称
-        resultStack.setHoverName(
-            Component.translatable("item.fuzhouplan.unresolved_dna_can.gene_sample", mob.getDisplayName())
-        );
-
-        return resultStack;
+        return new ItemStack(unresolvedDnaCanItem);
     }
 
     @Override

@@ -88,8 +88,6 @@ public class Fuzhouplan {
     public static final RegistryObject<Item> EDTA_POWDER = ITEMS.register("edta_powder", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> TE_BUFFER = ITEMS.register("te_buffer", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> TE_BUFFER_CAN = ITEMS.register("te_buffer_can", () -> new Item(new Item.Properties().stacksTo(64)));
-    public static final RegistryObject<Item> DNA_CAN = ITEMS.register("dna_can", () -> new Item(new Item.Properties().stacksTo(64)));
-    public static final RegistryObject<Item> UNRESOLVED_DNA_CAN = ITEMS.register("unresolved_dna_can", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> UNKNOWN_MIXTURE = ITEMS.register("unknown_mixture", () -> new Item(new Item.Properties().stacksTo(64)));
 
     // Task 5: 发酵桶
@@ -142,8 +140,6 @@ public class Fuzhouplan {
         output.accept(EDTA_POWDER.get());
         output.accept(TE_BUFFER.get());
         output.accept(TE_BUFFER_CAN.get());
-        output.accept(DNA_CAN.get());
-        output.accept(UNRESOLVED_DNA_CAN.get());
         output.accept(UNKNOWN_MIXTURE.get());
         output.accept(BIO_GENE_EXTRACTOR.get());
         // Task 5: 发酵桶
