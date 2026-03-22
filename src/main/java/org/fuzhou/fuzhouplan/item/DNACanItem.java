@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class DnaCanItem extends Item {
+public class DNACanItem extends Item {
 
     private final EntityType<?> entityType;
 
-    public DnaCanItem(Properties properties, EntityType<?> entityType) {
+    public DNACanItem(Properties properties, EntityType<?> entityType) {
         super(properties);
         this.entityType = entityType;
     }

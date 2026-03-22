@@ -33,8 +33,8 @@ public class DnaCanManager {
 
             Item.Properties properties = new Item.Properties().stacksTo(64);
 
-            Item dnaCan = new DnaCanItem(properties, entityType);
-            Item unresolvedDnaCan = new UnresolvedDnaCanItem(properties, entityType);
+            Item dnaCan = new DNACanItem(properties, entityType);
+            Item unresolvedDnaCan = new UnresolvedDNACanItem(properties, entityType);
 
             ResourceLocation dnaCanId = ResourceLocation.tryBuild(Fuzhouplan.MODID, "dna_can_" + path);
             ResourceLocation unresolvedDnaCanId = ResourceLocation.tryBuild(Fuzhouplan.MODID, "unresolved_dna_can_" + path);
