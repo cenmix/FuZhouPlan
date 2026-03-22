@@ -1,32 +1,27 @@
 package org.fuzhou.fuzhouplan.item;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.RegisterEvent;
-import net.minecraft.core.Registry;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Fuzhouplan.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DnaCanManager {
 
-    private static final Map<EntityType<?>, Supplier<Item>> DNA_CAN_MAP = new HashMap<>();
-    private static final Map<EntityType<?>, Supplier<Item>> UNRESOLVED_DNA_CAN_MAP = new HashMap<>();
     private static final Map<ResourceLocation, Item> DNA_CAN_BY_ID = new HashMap<>();
     private static final Map<ResourceLocation, Item> UNRESOLVED_DNA_CAN_BY_ID = new HashMap<>();
 
     @SubscribeEvent
     public static void onRegisterItems(RegisterEvent event) {
-        if (!event.getRegistryKey().equals(Registry.ITEM_REGISTRY)) {
+        if (!event.getRegistryKey().equals(Registries.ITEM)) {
             return;
         }
 
@@ -41,11 +36,11 @@ public class DnaCanManager {
             Item dnaCan = new DnaCanItem(properties, entityType);
             Item unresolvedDnaCan = new UnresolvedDnaCanItem(properties, entityType);
 
-            ResourceLocation dnaCanId = new ResourceLocation(Fuzhouplan.MODID, "dna_can_" + path);
-            ResourceLocation unresolvedDnaCanId = new ResourceLocation(Fuzhouplan.MODID, "unresolved_dna_can_" + path);
+            ResourceLocation dnaCanId = ResourceLocation.tryBuild(Fuzhouplan.MODID, "dna_can_" + path);
+            ResourceLocation unresolvedDnaCanId = ResourceLocation.tryBuild(Fuzhouplan.MODID, "unresolved_dna_can_" + path);
 
-            event.register(Registry.ITEM_REGISTRY, dnaCanId, () -> dnaCan);
-            event.register(Registry.ITEM_REGISTRY, unresolvedDnaCanId, () -> unresolvedDnaCan);
+            event.register(Registries.ITEM, dnaCanId, () -> dnaCan);
+            event.register(Registries.ITEM, unresolvedDnaCanId, () -> unresolvedDnaCan);
 
             DNA_CAN_BY_ID.put(entityId, dnaCan);
             UNRESOLVED_DNA_CAN_BY_ID.put(entityId, unresolvedDnaCan);

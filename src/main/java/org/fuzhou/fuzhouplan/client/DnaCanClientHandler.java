@@ -1,6 +1,5 @@
 package org.fuzhou.fuzhouplan.client;
 
-import net.minecraft.client.renderer.item.ItemModelShaper;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,8 +13,8 @@ import org.fuzhou.fuzhouplan.item.DnaCanManager;
 @Mod.EventBusSubscriber(modid = Fuzhouplan.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DnaCanClientHandler {
 
-    private static final ResourceLocation DNA_CAN_MODEL = new ResourceLocation(Fuzhouplan.MODID, "item/dna_can");
-    private static final ResourceLocation UNRESOLVED_DNA_CAN_MODEL = new ResourceLocation(Fuzhouplan.MODID, "item/unresolved_dna_can");
+    private static final ResourceLocation DNA_CAN_MODEL = ResourceLocation.tryBuild(Fuzhouplan.MODID, "item/dna_can");
+    private static final ResourceLocation UNRESOLVED_DNA_CAN_MODEL = ResourceLocation.tryBuild(Fuzhouplan.MODID, "item/unresolved_dna_can");
 
     @SubscribeEvent
     public static void onModelBake(ModelEvent.ModifyBakingResult event) {
