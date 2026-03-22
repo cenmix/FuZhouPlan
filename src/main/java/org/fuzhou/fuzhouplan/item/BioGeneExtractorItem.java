@@ -112,10 +112,10 @@ public class BioGeneExtractorItem extends Item {
     }
 
     /**
-     * 创建带有生物基因信息的TE缓冲液储存罐
+     * 创建带有生物基因信息的未解析DNA储存罐
      */
     private ItemStack createGeneSample(Mob mob) {
-        ItemStack resultStack = new ItemStack(Fuzhouplan.TE_BUFFER_CAN.get());
+        ItemStack resultStack = new ItemStack(Fuzhouplan.UNRESOLVED_DNA_CAN.get());
 
         CompoundTag tag = new CompoundTag();
 
@@ -138,7 +138,7 @@ public class BioGeneExtractorItem extends Item {
 
         // 设置显示名称
         resultStack.setHoverName(
-            Component.translatable("item.fuzhouplan.te_buffer.gene_sample", mob.getDisplayName())
+            Component.translatable("item.fuzhouplan.unresolved_dna_can.gene_sample", mob.getDisplayName())
         );
 
         return resultStack;
