@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "has_output=0": { "model": "fuzhouplan:block/fermentation_barrel" },
+    "has_output=1": { "model": "fuzhouplan:block/fermentation_barrel_output" }
+  }
+}

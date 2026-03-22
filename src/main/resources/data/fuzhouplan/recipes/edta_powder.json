@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "fuzhouplan:edta_paste"
+  },
+  "result": "fuzhouplan:edta_powder",
+  "experience": 0.7,
+  "cookingtime": 200
+}

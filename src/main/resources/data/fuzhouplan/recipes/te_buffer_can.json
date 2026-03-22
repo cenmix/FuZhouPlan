@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "fuzhouplan:iron_can"
+    },
+    {
+      "item": "fuzhouplan:te_buffer"
+    }
+  ],
+  "result": {
+    "item": "fuzhouplan:te_buffer_can",
+    "count": 1
+  }
+}
