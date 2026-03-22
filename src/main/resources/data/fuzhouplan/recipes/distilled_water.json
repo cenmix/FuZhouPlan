@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "minecraft:potion"
+  },
+  "result": "fuzhouplan:distilled_water",
+  "experience": 0.7,
+  "cookingtime": 200
+}

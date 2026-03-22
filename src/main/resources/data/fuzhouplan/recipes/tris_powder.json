@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "fuzhouplan:tris_paste"
+  },
+  "result": "fuzhouplan:tris_powder",
+  "experience": 0.7,
+  "cookingtime": 200
+}

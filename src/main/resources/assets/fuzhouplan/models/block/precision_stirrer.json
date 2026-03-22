@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "fuzhouplan:block/precision_stirrer_bottom",
+    "side": "fuzhouplan:block/precision_stirrer_side",
+    "top": "fuzhouplan:block/precision_stirrer_top"
+  }
+}

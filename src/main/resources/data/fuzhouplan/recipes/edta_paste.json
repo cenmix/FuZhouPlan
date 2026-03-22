@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_nugget"
+    },
+    {
+      "item": "minecraft:iron_nugget"
+    },
+    {
+      "item": "fuzhouplan:vinegar_bottle"
+    },
+    {
+      "item": "fuzhouplan:ethylenediamine"
+    },
+    {
+      "item": "minecraft:gunpowder"
+    }
+  ],
+  "result": {
+    "item": "fuzhouplan:edta_paste",
+    "count": 1
+  }
+}

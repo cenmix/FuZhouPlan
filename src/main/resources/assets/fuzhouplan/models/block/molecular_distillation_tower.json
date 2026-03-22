@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "fuzhouplan:block/molecular_distillation_tower_top",
+    "side": "fuzhouplan:block/molecular_distillation_tower_side"
+  }
+}
