@@ -1,7 +1,9 @@
 package org.fuzhou.fuzhouplan.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -13,8 +15,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
+import org.fuzhou.fuzhouplan.item.UnresolvedDNACanItem;
 
 import java.util.List;
 
@@ -23,6 +27,9 @@ import java.util.List;
  * 用于从麻醉状态的生物中提取基因样本
  */
 public class BioGeneExtractorItem extends Item {
+
+    private static final String NBT_ENTITY_TYPE = "EntityType";
+    private static final String NBT_ENTITY_NAME = "EntityName";
 
     public BioGeneExtractorItem(Properties properties) {
         super(properties.stacksTo(1));
@@ -70,8 +77,8 @@ public class BioGeneExtractorItem extends Item {
         // 成功提取：消耗1个TE缓冲液储存罐
         teBufferStack.shrink(1);
 
-        // 创建带有生物信息的TE缓冲液储存罐
-        ItemStack resultStack = createGeneSample(mob);
+        // 创建未解析的DNA储存罐（而不是TE缓冲液储存罐）
+        ItemStack resultStack = createUnresolvedDNASample(mob);
 
         // 给予玩家产物
         if (!player.getInventory().add(resultStack)) {
@@ -106,14 +113,28 @@ public class BioGeneExtractorItem extends Item {
     }
 
     /**
-     * 创建对应生物的未解析DNA储存罐
+     * 创建未解析的DNA储存罐
      */
-    private ItemStack createGeneSample(Mob mob) {
-        Item unresolvedDnaCanItem = DnaCanManager.getUnresolvedDnaCan(mob.getType());
-        if (unresolvedDnaCanItem == null) {
-            return ItemStack.EMPTY;
+    private ItemStack createUnresolvedDNASample(Mob mob) {
+        // 获取生物类型和名称
+        ResourceLocation entityType = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType());
+        String entityName = "";
+        
+        Component customName = mob.getCustomName();
+        if (customName != null) {
+            entityName = Component.Serializer.toJson(customName);
+        } else {
+            // 使用生物的默认显示名称
+            entityName = Component.Serializer.toJson(mob.getDisplayName());
         }
-        return new ItemStack(unresolvedDnaCanItem);
+        
+        // 创建未解析的DNA储存罐
+        if (entityType != null) {
+            return UnresolvedDNACanItem.createUnresolvedDNACan(entityType.toString(), entityName);
+        }
+        
+        // 如果无法获取生物类型，返回空的未解析DNA储存罐
+        return new ItemStack(Fuzhouplan.UNRESOLVED_DNA_CAN.get());
     }
 
     @Override
