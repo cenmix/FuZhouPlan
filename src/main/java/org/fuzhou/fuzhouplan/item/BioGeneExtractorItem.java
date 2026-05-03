@@ -1,9 +1,7 @@
 package org.fuzhou.fuzhouplan.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -15,20 +13,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 
 import java.util.List;
 
-/**
- * 生物基因提取器
- * 用于从麻醉状态的生物中提取基因样本
- */
 public class BioGeneExtractorItem extends Item {
-
-    private static final String NBT_ENTITY_TYPE = "EntityType";
-    private static final String NBT_ENTITY_NAME = "EntityName";
 
     public BioGeneExtractorItem(Properties properties) {
         super(properties.stacksTo(1));
@@ -42,67 +32,63 @@ public class BioGeneExtractorItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        // 检查是否为Mob类型
         if (!(interactionTarget instanceof Mob mob)) {
             player.displayClientMessage(
-                Component.translatable("item.fuzhouplan.bio_gene_extractor.not_mob")
-                    .withStyle(ChatFormatting.YELLOW),
-                true
+                    Component.translatable("item.fuzhouplan.bio_gene_extractor.not_mob")
+                            .withStyle(ChatFormatting.YELLOW),
+                    true
             );
             return InteractionResult.FAIL;
         }
 
-        // 检查生物是否处于麻醉状态
         if (!mob.getPersistentData().getBoolean("Anesthetized")) {
             player.displayClientMessage(
-                Component.translatable("item.fuzhouplan.bio_gene_extractor.not_anesthetized")
-                    .withStyle(ChatFormatting.RED),
-                true
+                    Component.translatable("item.fuzhouplan.bio_gene_extractor.not_anesthetized")
+                            .withStyle(ChatFormatting.RED),
+                    true
             );
             return InteractionResult.FAIL;
         }
 
-        // 检查玩家背包中是否有TE缓冲液储存罐
         ItemStack teBufferStack = findTEBufferInInventory(player);
         if (teBufferStack.isEmpty()) {
             player.displayClientMessage(
-                Component.translatable("item.fuzhouplan.bio_gene_extractor.no_te_buffer")
-                    .withStyle(ChatFormatting.RED),
-                true
+                    Component.translatable("item.fuzhouplan.bio_gene_extractor.no_te_buffer")
+                            .withStyle(ChatFormatting.RED),
+                    true
             );
             return InteractionResult.FAIL;
         }
 
-        // 成功提取：消耗1个TE缓冲液储存罐
         teBufferStack.shrink(1);
 
-        // 创建带有生物信息的TE缓冲液储存罐
-        ItemStack resultStack = createGeneSample(mob);
+        ItemStack resultStack = DNACanRegistry.createUnresolvedDNACan(mob.getType());
+        if (resultStack.isEmpty()) {
+            player.displayClientMessage(
+                    Component.translatable("item.fuzhouplan.bio_gene_extractor.unsupported_entity")
+                            .withStyle(ChatFormatting.RED),
+                    true
+            );
+            return InteractionResult.FAIL;
+        }
 
-        // 给予玩家产物
         if (!player.getInventory().add(resultStack)) {
             player.drop(resultStack, false);
         }
 
-        // 播放音效
         level.playSound(null, mob.getX(), mob.getY(), mob.getZ(),
-            SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 1.0f, 1.0f);
+                SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 1.0f, 1.0f);
 
-        // 显示成功消息
         player.displayClientMessage(
-            Component.translatable("item.fuzhouplan.bio_gene_extractor.success", mob.getDisplayName())
-                .withStyle(ChatFormatting.GREEN),
-            true
+                Component.translatable("item.fuzhouplan.bio_gene_extractor.success", mob.getDisplayName())
+                        .withStyle(ChatFormatting.GREEN),
+                true
         );
 
         return InteractionResult.CONSUME;
     }
 
-    /**
-     * 在玩家背包中查找TE缓冲液储存罐
-     */
     private ItemStack findTEBufferInInventory(Player player) {
-        // 检查主背包
         for (ItemStack stack : player.getInventory().items) {
             if (stack.getItem() == Fuzhouplan.TE_BUFFER_CAN.get()) {
                 return stack;
@@ -111,52 +97,19 @@ public class BioGeneExtractorItem extends Item {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * 创建带有生物基因信息的未解析DNA储存罐
-     */
-    private ItemStack createGeneSample(Mob mob) {
-        ItemStack resultStack = new ItemStack(Fuzhouplan.UNRESOLVED_DNA_CAN.get());
-
-        CompoundTag tag = new CompoundTag();
-
-        // 存储生物类型
-        ResourceLocation entityType = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType());
-        if (entityType != null) {
-            tag.putString(NBT_ENTITY_TYPE, entityType.toString());
-        }
-
-        // 存储生物名称
-        Component customName = mob.getCustomName();
-        if (customName != null) {
-            tag.putString(NBT_ENTITY_NAME, Component.Serializer.toJson(customName));
-        } else {
-            // 使用生物的默认显示名称
-            tag.putString(NBT_ENTITY_NAME, Component.Serializer.toJson(mob.getDisplayName()));
-        }
-
-        resultStack.setTag(tag);
-
-        // 设置显示名称
-        resultStack.setHoverName(
-            Component.translatable("item.fuzhouplan.unresolved_dna_can.gene_sample", mob.getDisplayName())
-        );
-
-        return resultStack;
-    }
-
     @Override
     public void appendHoverText(@NotNull ItemStack stack, Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
         tooltipComponents.add(
-            Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line1")
-                .withStyle(ChatFormatting.GRAY)
+                Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line1")
+                        .withStyle(ChatFormatting.GRAY)
         );
         tooltipComponents.add(
-            Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line2")
-                .withStyle(ChatFormatting.AQUA)
+                Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line2")
+                        .withStyle(ChatFormatting.AQUA)
         );
         tooltipComponents.add(
-            Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line3")
-                .withStyle(ChatFormatting.YELLOW)
+                Component.translatable("item.fuzhouplan.bio_gene_extractor.tooltip.line3")
+                        .withStyle(ChatFormatting.YELLOW)
         );
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }

@@ -19,6 +19,9 @@ import org.fuzhou.fuzhouplan.item.BioAnestheticItem;
 import org.fuzhou.fuzhouplan.item.BioGeneExtractorItem;
 import org.fuzhou.fuzhouplan.item.SyringeItem;
 import org.fuzhou.fuzhouplan.item.GreenBerryItem;
+import org.fuzhou.fuzhouplan.item.DNACanRegistry;
+import org.fuzhou.fuzhouplan.item.DNACanItem;
+import org.fuzhou.fuzhouplan.item.UnresolvedDNACanItem;
 import org.fuzhou.fuzhouplan.block.GreenBerryBushBlock;
 import org.fuzhou.fuzhouplan.block.FermentationBarrelBlock;
 import org.fuzhou.fuzhouplan.block.MolecularDistillationTowerBlock;
@@ -88,9 +91,9 @@ public class Fuzhouplan {
     public static final RegistryObject<Item> EDTA_POWDER = ITEMS.register("edta_powder", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> TE_BUFFER = ITEMS.register("te_buffer", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> TE_BUFFER_CAN = ITEMS.register("te_buffer_can", () -> new Item(new Item.Properties().stacksTo(64)));
-    public static final RegistryObject<Item> DNA_CAN = ITEMS.register("dna_can", () -> new Item(new Item.Properties().stacksTo(64)));
-    public static final RegistryObject<Item> UNRESOLVED_DNA_CAN = ITEMS.register("unresolved_dna_can", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> UNKNOWN_MIXTURE = ITEMS.register("unknown_mixture", () -> new Item(new Item.Properties().stacksTo(64)));
+    
+    // DNA储存罐物品通过DNACanRegistry动态注册
 
     // Task 5: 发酵桶
     public static final RegistryObject<Block> FERMENTATION_BARREL = BLOCKS.register("fermentation_barrel", 
@@ -142,10 +145,14 @@ public class Fuzhouplan {
         output.accept(EDTA_POWDER.get());
         output.accept(TE_BUFFER.get());
         output.accept(TE_BUFFER_CAN.get());
-        output.accept(DNA_CAN.get());
-        output.accept(UNRESOLVED_DNA_CAN.get());
         output.accept(UNKNOWN_MIXTURE.get());
         output.accept(BIO_GENE_EXTRACTOR.get());
+        for (UnresolvedDNACanItem item : DNACanRegistry.getAllUnresolvedCans().values()) {
+            output.accept(item);
+        }
+        for (DNACanItem item : DNACanRegistry.getAllResolvedCans().values()) {
+            output.accept(item);
+        }
         // Task 5: 发酵桶
         output.accept(FERMENTATION_BARREL_ITEM.get());
         // Task 6: 分子蒸馏塔
