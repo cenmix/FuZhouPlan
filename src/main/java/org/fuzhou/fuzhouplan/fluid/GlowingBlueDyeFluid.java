@@ -3,6 +3,7 @@ package org.fuzhou.fuzhouplan.fluid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -44,12 +45,12 @@ public abstract class GlowingBlueDyeFluid extends ForgeFlowingFluid {
     }
 
     @Override
-    protected boolean canConvertToSource(Level level, BlockPos pos, BlockState state, FluidState fluidState) {
+    public boolean canConvertToSource(FluidState state, Level level, BlockPos pos) {
         return false;
     }
 
     @Override
-    protected int getTickDelay(Level level) {
+    public int getTickDelay(LevelReader level) {
         return 20;
     }
 
@@ -66,11 +67,6 @@ public abstract class GlowingBlueDyeFluid extends ForgeFlowingFluid {
     @Override
     public boolean isSame(Fluid fluid) {
         return fluid == SOURCE.get() || fluid == FLOWING.get();
-    }
-
-    @Override
-    protected int getSpreadDelay(Level level, BlockPos pos, FluidState currentState, FluidState newState) {
-        return getTickDelay(level);
     }
 
     public static class Source extends GlowingBlueDyeFluid {
