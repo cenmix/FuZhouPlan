@@ -13,25 +13,41 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidType;
 import org.fuzhou.fuzhouplan.item.BioAnestheticItem;
 import org.fuzhou.fuzhouplan.item.BioGeneExtractorItem;
 import org.fuzhou.fuzhouplan.item.SyringeItem;
 import org.fuzhou.fuzhouplan.item.GreenBerryItem;
+import org.fuzhou.fuzhouplan.item.BlueBerryItem;
+import org.fuzhou.fuzhouplan.item.GlowingBlueDyeBucketItem;
+import org.fuzhou.fuzhouplan.item.GlowingBlueDyeItem;
+import org.fuzhou.fuzhouplan.fluid.GlowingBlueDyeFluid;
+import org.fuzhou.fuzhouplan.fluid.GlowingBlueDyeFluidType;
 import org.fuzhou.fuzhouplan.item.DNACanRegistry;
 import org.fuzhou.fuzhouplan.item.DNACanItem;
 import org.fuzhou.fuzhouplan.item.UnresolvedDNACanItem;
 import org.fuzhou.fuzhouplan.block.GreenBerryBushBlock;
+import org.fuzhou.fuzhouplan.block.BlueBerryBushBlock;
 import org.fuzhou.fuzhouplan.block.FermentationBarrelBlock;
 import org.fuzhou.fuzhouplan.block.MolecularDistillationTowerBlock;
 import org.fuzhou.fuzhouplan.block.PrecisionStirrerBlock;
+import org.fuzhou.fuzhouplan.block.DryerBlock;
+import org.fuzhou.fuzhouplan.block.ResolverBlock;
 import org.fuzhou.fuzhouplan.blockentity.FermentationBarrelBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.MolecularDistillationTowerBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.PrecisionStirrerBlockEntity;
+import org.fuzhou.fuzhouplan.blockentity.DryerBlockEntity;
+import org.fuzhou.fuzhouplan.blockentity.ResolverBlockEntity;
 import org.fuzhou.fuzhouplan.menu.PrecisionStirrerMenu;
 import org.fuzhou.fuzhouplan.menu.FermentationBarrelMenu;
 import org.fuzhou.fuzhouplan.menu.MolecularDistillationTowerMenu;
+import org.fuzhou.fuzhouplan.menu.DryerMenu;
+import org.fuzhou.fuzhouplan.menu.ResolverMenu;
 import org.fuzhou.fuzhouplan.network.NetworkHandler;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -58,6 +74,8 @@ import net.minecraft.network.chat.Component;
 import org.fuzhou.fuzhouplan.client.gui.PrecisionStirrerScreen;
 import org.fuzhou.fuzhouplan.client.gui.FermentationBarrelScreen;
 import org.fuzhou.fuzhouplan.client.gui.MolecularDistillationTowerScreen;
+import org.fuzhou.fuzhouplan.client.gui.DryerScreen;
+import org.fuzhou.fuzhouplan.client.gui.ResolverScreen;
 import org.slf4j.Logger;
 
 @Mod(Fuzhouplan.MODID)
@@ -70,12 +88,28 @@ public class Fuzhouplan {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MODID);
+    public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, MODID);
+    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, MODID);
 
     public static final RegistryObject<Item> BIO_ANESTHETIC = ITEMS.register("bio_anesthetic", () -> new BioAnestheticItem(new Item.Properties()));
     public static final RegistryObject<Item> SYRINGE = ITEMS.register("syringe", () -> new SyringeItem(new Item.Properties()));
     public static final RegistryObject<Item> BIO_GENE_EXTRACTOR = ITEMS.register("bio_gene_extractor", () -> new BioGeneExtractorItem(new Item.Properties()));
     public static final RegistryObject<Item> GREEN_BERRY = ITEMS.register("green_berry", () -> new GreenBerryItem(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 100, 0), 1.0f).build())));
     public static final RegistryObject<Block> GREEN_BERRY_BUSH = BLOCKS.register("green_berry_bush", () -> new GreenBerryBushBlock(BlockBehaviour.Properties.of().noCollission().randomTicks().instabreak().sound(net.minecraft.world.level.block.SoundType.SWEET_BERRY_BUSH)));
+
+    public static final RegistryObject<Item> BLUE_BERRY = ITEMS.register("blue_berry", () -> new BlueBerryItem(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(() -> new MobEffectInstance(MobEffects.NIGHT_VISION, 100, 0), 1.0f).build())));
+    public static final RegistryObject<Block> BLUE_BERRY_BUSH = BLOCKS.register("blue_berry_bush", () -> new BlueBerryBushBlock(BlockBehaviour.Properties.of().noCollission().randomTicks().instabreak().sound(net.minecraft.world.level.block.SoundType.SWEET_BERRY_BUSH)));
+
+    public static final RegistryObject<Item> GLOWING_BLUE_DYE_BUCKET = ITEMS.register("glowing_blue_dye_bucket", () -> new BucketItem(GlowingBlueDyeFluid.SOURCE, new Item.Properties().stacksTo(1).craftRemainder(net.minecraft.world.item.Items.BUCKET)));
+    public static final RegistryObject<Item> GLOWING_BLUE_DYE = ITEMS.register("glowing_blue_dye", () -> new GlowingBlueDyeItem(new Item.Properties().stacksTo(64)));
+
+    // 发光蓝色染料流体
+    public static final RegistryObject<FluidType> GLOWING_BLUE_DYE_FLUID_TYPE = FLUID_TYPES.register("glowing_blue_dye", GlowingBlueDyeFluidType::new);
+
+    public static final RegistryObject<GlowingBlueDyeFluid.Source> GLOWING_BLUE_DYE_SOURCE = FLUIDS.register("glowing_blue_dye", () -> new GlowingBlueDyeFluid.Source(GlowingBlueDyeFluid.makeProperties()));
+    public static final RegistryObject<GlowingBlueDyeFluid.Flowing> GLOWING_BLUE_DYE_FLOWING = FLUIDS.register("flowing_glowing_blue_dye", () -> new GlowingBlueDyeFluid.Flowing(GlowingBlueDyeFluid.makeProperties()));
+
+    public static final RegistryObject<LiquidBlock> GLOWING_BLUE_DYE_BLOCK = BLOCKS.register("glowing_blue_dye", () -> new LiquidBlock(GLOWING_BLUE_DYE_SOURCE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.WATER).noCollission().strength(100.0F).noLootTable()));
 
     // Task 1: 基础物品注册
     public static final RegistryObject<Item> IRON_CAN = ITEMS.register("iron_can", () -> new Item(new Item.Properties().stacksTo(64)));
@@ -127,6 +161,26 @@ public class Fuzhouplan {
     public static final RegistryObject<MenuType<MolecularDistillationTowerMenu>> MOLECULAR_DISTILLATION_TOWER_MENU = MENUS.register("molecular_distillation_tower",
             () -> IForgeMenuType.create(MolecularDistillationTowerMenu::new));
 
+    // 烘干机
+    public static final RegistryObject<Block> DRYER = BLOCKS.register("dryer",
+            () -> new DryerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0f).sound(net.minecraft.world.level.block.SoundType.METAL)));
+    public static final RegistryObject<Item> DRYER_ITEM = ITEMS.register("dryer",
+            () -> new BlockItem(DRYER.get(), new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<DryerBlockEntity>> DRYER_ENTITY = BLOCK_ENTITIES.register("dryer",
+            () -> BlockEntityType.Builder.of(DryerBlockEntity::new, DRYER.get()).build(null));
+    public static final RegistryObject<MenuType<DryerMenu>> DRYER_MENU = MENUS.register("dryer",
+            () -> IForgeMenuType.create(DryerMenu::new));
+
+    // 解析器
+    public static final RegistryObject<Block> RESOLVER = BLOCKS.register("resolver",
+            () -> new ResolverBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f).sound(net.minecraft.world.level.block.SoundType.METAL)));
+    public static final RegistryObject<Item> RESOLVER_ITEM = ITEMS.register("resolver",
+            () -> new BlockItem(RESOLVER.get(), new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<ResolverBlockEntity>> RESOLVER_ENTITY = BLOCK_ENTITIES.register("resolver",
+            () -> BlockEntityType.Builder.of(ResolverBlockEntity::new, RESOLVER.get()).build(null));
+    public static final RegistryObject<MenuType<ResolverMenu>> RESOLVER_MENU = MENUS.register("resolver",
+            () -> IForgeMenuType.create(ResolverMenu::new));
+
     public static final RegistryObject<CreativeModeTab> FUZHOU_TAB = CREATIVE_MODE_TABS.register("fuzhou_tab", () -> CreativeModeTab.builder().withTabsBefore(CreativeModeTabs.COMBAT).icon(() -> BIO_ANESTHETIC.get().getDefaultInstance()).title(Component.translatable("itemGroup.fuzhouplan")).displayItems((parameters, output) -> {
         output.accept(SYRINGE.get());
         output.accept(BIO_ANESTHETIC.get());
@@ -147,6 +201,9 @@ public class Fuzhouplan {
         output.accept(TE_BUFFER_CAN.get());
         output.accept(UNKNOWN_MIXTURE.get());
         output.accept(BIO_GENE_EXTRACTOR.get());
+        output.accept(BLUE_BERRY.get());
+        output.accept(GLOWING_BLUE_DYE_BUCKET.get());
+        output.accept(GLOWING_BLUE_DYE.get());
         for (UnresolvedDNACanItem item : DNACanRegistry.getAllUnresolvedCans().values()) {
             output.accept(item);
         }
@@ -159,6 +216,10 @@ public class Fuzhouplan {
         output.accept(MOLECULAR_DISTILLATION_TOWER_ITEM.get());
         // Task 7: 精密搅拌器
         output.accept(PRECISION_STIRRER_ITEM.get());
+        // 烘干机
+        output.accept(DRYER_ITEM.get());
+        // 解析器
+        output.accept(RESOLVER_ITEM.get());
     }).build());
 
     public Fuzhouplan() {
@@ -169,6 +230,8 @@ public class Fuzhouplan {
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         MENUS.register(modEventBus);
+        FLUID_TYPES.register(modEventBus);
+        FLUIDS.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -197,9 +260,12 @@ public class Fuzhouplan {
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
             event.enqueueWork(() -> {
                 ItemBlockRenderTypes.setRenderLayer(GREEN_BERRY_BUSH.get(), RenderType.cutout());
+                ItemBlockRenderTypes.setRenderLayer(BLUE_BERRY_BUSH.get(), RenderType.cutout());
                 MenuScreens.register(PRECISION_STIRRER_MENU.get(), PrecisionStirrerScreen::new);
                 MenuScreens.register(FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
                 MenuScreens.register(MOLECULAR_DISTILLATION_TOWER_MENU.get(), MolecularDistillationTowerScreen::new);
+                MenuScreens.register(DRYER_MENU.get(), DryerScreen::new);
+                MenuScreens.register(RESOLVER_MENU.get(), ResolverScreen::new);
             });
         }
     }

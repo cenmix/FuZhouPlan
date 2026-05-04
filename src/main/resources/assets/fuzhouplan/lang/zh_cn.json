@@ -5,6 +5,16 @@
   "item.fuzhouplan.green_berry": "绿浆果",
   "item.fuzhouplan.green_berry.tooltip": "一种清新的小果实，但会引起反胃",
   "block.fuzhouplan.green_berry_bush": "绿浆果丛",
+  "item.fuzhouplan.blue_berry": "蓝浆果",
+  "item.fuzhouplan.blue_berry.tooltip": "一种散发微光的小果实，食用后获得夜视效果",
+  "block.fuzhouplan.blue_berry_bush": "蓝浆果丛",
+  "item.fuzhouplan.glowing_blue_dye_bucket": "发光蓝色染料桶",
+  "item.fuzhouplan.glowing_blue_dye_bucket.tooltip": "发光的蓝色液体染料",
+  "item.fuzhouplan.glowing_blue_dye_bucket.tooltip.usage": "放入烘干机烘干获得发光蓝色染料",
+  "block.fuzhouplan.glowing_blue_dye": "发光蓝色染料",
+  "item.fuzhouplan.glowing_blue_dye": "发光蓝色染料",
+  "item.fuzhouplan.glowing_blue_dye.tooltip": "一种散发荧光的蓝色染料",
+  "item.fuzhouplan.glowing_blue_dye.tooltip.usage": "用于在解析器中解析DNA储存罐",
   "item.fuzhouplan.bio_anesthetic": "生物麻醉剂",
   "item.fuzhouplan.bio_anesthetic.tooltip.line1": "一种强效麻醉剂，可使生物定身。",
   "item.fuzhouplan.bio_anesthetic.tooltip.line2": "仅对最大生命值 ≤ %s 的生物有效",
@@ -52,5 +62,9 @@
   "block.fuzhouplan.precision_stirrer.tooltip": "用于制作TE缓冲液的精密设备",
   "gui.fuzhouplan.precision_stirrer.success": "合成成功！",
   "gui.fuzhouplan.precision_stirrer.failed": "合成失败！",
-  "gui.fuzhouplan.precision_stirrer.waiting": "等待材料..."
+  "gui.fuzhouplan.precision_stirrer.waiting": "等待材料...",
+  "block.fuzhouplan.dryer": "烘干机",
+  "block.fuzhouplan.dryer.tooltip": "烘干液体容器，分离液体和容器",
+  "block.fuzhouplan.resolver": "解析器",
+  "block.fuzhouplan.resolver.tooltip": "使用发光蓝色染料解析未解析的DNA储存罐"
 }
