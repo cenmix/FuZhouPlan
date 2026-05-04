@@ -100,7 +100,7 @@ public class Fuzhouplan {
     public static final RegistryObject<Item> BLUE_BERRY = ITEMS.register("blue_berry", () -> new BlueBerryItem(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(() -> new MobEffectInstance(MobEffects.NIGHT_VISION, 100, 0), 1.0f).build())));
     public static final RegistryObject<Block> BLUE_BERRY_BUSH = BLOCKS.register("blue_berry_bush", () -> new BlueBerryBushBlock(BlockBehaviour.Properties.of().noCollission().randomTicks().instabreak().sound(net.minecraft.world.level.block.SoundType.SWEET_BERRY_BUSH)));
 
-    public static final RegistryObject<Item> GLOWING_BLUE_DYE_BUCKET = ITEMS.register("glowing_blue_dye_bucket", () -> new BucketItem(GlowingBlueDyeFluid.SOURCE, new Item.Properties().stacksTo(1).craftRemainder(net.minecraft.world.item.Items.BUCKET)));
+    public static final RegistryObject<Item> GLOWING_BLUE_DYE_BUCKET = ITEMS.register("glowing_blue_dye_bucket", () -> new BucketItem(GlowingBlueDyeFluid.SOURCE, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GLOWING_BLUE_DYE = ITEMS.register("glowing_blue_dye", () -> new GlowingBlueDyeItem(new Item.Properties().stacksTo(64)));
 
     // 发光蓝色染料流体
@@ -261,6 +261,8 @@ public class Fuzhouplan {
             event.enqueueWork(() -> {
                 ItemBlockRenderTypes.setRenderLayer(GREEN_BERRY_BUSH.get(), RenderType.cutout());
                 ItemBlockRenderTypes.setRenderLayer(BLUE_BERRY_BUSH.get(), RenderType.cutout());
+                ItemBlockRenderTypes.setRenderLayer(GLOWING_BLUE_DYE_SOURCE.get(), RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(GLOWING_BLUE_DYE_FLOWING.get(), RenderType.translucent());
                 MenuScreens.register(PRECISION_STIRRER_MENU.get(), PrecisionStirrerScreen::new);
                 MenuScreens.register(FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
                 MenuScreens.register(MOLECULAR_DISTILLATION_TOWER_MENU.get(), MolecularDistillationTowerScreen::new);
