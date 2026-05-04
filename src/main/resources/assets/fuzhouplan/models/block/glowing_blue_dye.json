@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/water",
+  "textures": {
+    "particle": "fuzhouplan:block/glowing_blue_dye"
+  }
+}
