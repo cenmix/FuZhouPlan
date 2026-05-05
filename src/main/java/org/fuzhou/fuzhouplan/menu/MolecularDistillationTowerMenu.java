@@ -25,7 +25,7 @@ public class MolecularDistillationTowerMenu extends AbstractContainerMenu {
         this.data = blockEntity.getDataAccess();
 
         blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            addSlot(new SlotItemHandler(handler, MolecularDistillationTowerBlockEntity.INPUT_SLOT, 56, 17));
+            addSlot(new SlotItemHandler(handler, MolecularDistillationTowerBlockEntity.INPUT_SLOT, 56, 35));
             addSlot(new SlotItemHandler(handler, MolecularDistillationTowerBlockEntity.OUTPUT_SLOT, 116, 35));
         });
 

@@ -1,0 +1,8 @@
+{
+  "type": "fuzhouplan:drying",
+  "input": { "item": "fuzhouplan:glowing_blue_dye_bucket" },
+  "primary_output": { "item": "minecraft:bucket" },
+  "secondary_output": { "item": "fuzhouplan:glowing_blue_dye" },
+  "processing_time": 300,
+  "energy_cost": 400
+}

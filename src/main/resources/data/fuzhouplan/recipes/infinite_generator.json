@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["DND", "NRN", "DND"],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "N": { "item": "minecraft:nether_star" },
+    "R": { "item": "minecraft:redstone_block" }
+  },
+  "result": { "item": "fuzhouplan:infinite_generator", "count": 1 }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "fuzhouplan:distilling",
+  "input": { "item": "fuzhouplan:distilled_water" },
+  "primary_output": { "item": "fuzhouplan:nuclease_free_water" },
+  "processing_time": 200,
+  "energy_cost": 1000
+}
