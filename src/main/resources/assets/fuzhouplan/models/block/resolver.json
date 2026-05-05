@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "fuzhouplan:block/resolver"
+    "particle": "fuzhouplan:block/resolver_front",
+    "down": "fuzhouplan:block/resolver_bottom",
+    "up": "fuzhouplan:block/resolver_top",
+    "north": "fuzhouplan:block/resolver_front",
+    "south": "fuzhouplan:block/resolver_side",
+    "west": "fuzhouplan:block/resolver_side",
+    "east": "fuzhouplan:block/resolver_side"
   }
 }

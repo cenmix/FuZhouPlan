@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "fuzhouplan:block/dryer"
+    "particle": "fuzhouplan:block/dryer_front",
+    "down": "fuzhouplan:block/dryer_bottom",
+    "up": "fuzhouplan:block/dryer_top",
+    "north": "fuzhouplan:block/dryer_front",
+    "south": "fuzhouplan:block/dryer_side",
+    "west": "fuzhouplan:block/dryer_side",
+    "east": "fuzhouplan:block/dryer_side"
   }
 }

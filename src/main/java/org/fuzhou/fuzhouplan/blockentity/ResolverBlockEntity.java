@@ -248,6 +248,10 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
         return dataAccess;
     }
 
+    public ItemStackHandler getItemHandler() {
+        return itemHandler;
+    }
+
     public boolean stillValid(Player player) {
         return this.level != null && this.level.getBlockEntity(this.worldPosition) == this &&
                player.distanceToSqr(this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5) <= 64.0;

@@ -9,7 +9,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 import org.fuzhou.fuzhouplan.blockentity.ResolverBlockEntity;
@@ -24,11 +23,9 @@ public class ResolverMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
         this.data = blockEntity.getDataAccess();
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            addSlot(new SlotItemHandler(handler, ResolverBlockEntity.INPUT_SLOT_DYE, 36, 35));
-            addSlot(new SlotItemHandler(handler, ResolverBlockEntity.INPUT_SLOT_DNA, 76, 35));
-            addSlot(new SlotItemHandler(handler, ResolverBlockEntity.OUTPUT_SLOT, 134, 35));
-        });
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), ResolverBlockEntity.INPUT_SLOT_DYE, 36, 35));
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), ResolverBlockEntity.INPUT_SLOT_DNA, 76, 35));
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), ResolverBlockEntity.OUTPUT_SLOT, 134, 35));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
