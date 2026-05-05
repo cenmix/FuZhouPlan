@@ -20,6 +20,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 import org.fuzhou.fuzhouplan.item.DNACanRegistry;
@@ -59,23 +60,9 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
         }
     };
 
-    private final EnergyStorage energyStorage = new EnergyStorage(MAX_ENERGY) {
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            int received = super.receiveEnergy(maxReceive, simulate);
-            if (received > 0 && !simulate) {
-                setChanged();
-            }
-            return received;
-        }
+    private final MachineEnergyStorage energyStorage = new MachineEnergyStorage(MAX_ENERGY);
 
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
-        }
-    };
-
-    private LazyOptional<ItemStackHandler> itemHandlerLazy = LazyOptional.of(() -> itemHandler);
+    private LazyOptional<IItemHandler> itemHandlerLazy = LazyOptional.of(() -> createSidedHandler());
     private LazyOptional<IEnergyStorage> energyStorageLazy = LazyOptional.of(() -> energyStorage);
 
     private int processingProgress = 0;
@@ -98,7 +85,7 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
         if (isProcessing) {
             int energyPerTick = ENERGY_PER_OPERATION / PROCESSING_TIME;
             if (energyStorage.getEnergyStored() >= energyPerTick) {
-                energyStorage.extractEnergy(energyPerTick, false);
+                energyStorage.consumeEnergy(energyPerTick);
                 processingProgress++;
                 if (processingProgress >= PROCESSING_TIME) {
                     finishProcessing();
@@ -207,7 +194,7 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     public void reviveCaps() {
         super.reviveCaps();
-        itemHandlerLazy = LazyOptional.of(() -> itemHandler);
+        itemHandlerLazy = LazyOptional.of(this::createSidedHandler);
         energyStorageLazy = LazyOptional.of(() -> energyStorage);
     }
 
@@ -244,6 +231,9 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
         public void set(int index, int value) {
             switch (index) {
                 case 0 -> ResolverBlockEntity.this.processingProgress = value;
+                case 1 -> { }
+                case 2 -> energyStorage.setEnergyStored(value);
+                case 3 -> { }
                 case 4 -> ResolverBlockEntity.this.isProcessing = value != 0;
             }
         }
@@ -272,5 +262,75 @@ public class ResolverBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return new ResolverMenu(containerId, inventory, this);
+    }
+
+    private IItemHandler createSidedHandler() {
+        return new IItemHandler() {
+            @Override
+            public int getSlots() {
+                return itemHandler.getSlots();
+            }
+
+            @Override
+            public ItemStack getStackInSlot(int slot) {
+                return itemHandler.getStackInSlot(slot);
+            }
+
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (slot != INPUT_SLOT_DYE && slot != INPUT_SLOT_DNA) return stack;
+                return itemHandler.insertItem(slot, stack, simulate);
+            }
+
+            @Override
+            public ItemStack extractItem(int slot, int amount, boolean simulate) {
+                if (slot != OUTPUT_SLOT) return ItemStack.EMPTY;
+                return itemHandler.extractItem(slot, amount, simulate);
+            }
+
+            @Override
+            public int getSlotLimit(int slot) {
+                return itemHandler.getSlotLimit(slot);
+            }
+
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return itemHandler.isItemValid(slot, stack);
+            }
+        };
+    }
+
+    private class MachineEnergyStorage extends EnergyStorage {
+        public MachineEnergyStorage(int capacity) {
+            super(capacity);
+        }
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            int received = super.receiveEnergy(maxReceive, simulate);
+            if (received > 0 && !simulate) {
+                setChanged();
+            }
+            return received;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+
+        public void consumeEnergy(int amount) {
+            this.energy = Math.max(0, this.energy - amount);
+            setChanged();
+        }
+
+        public void setEnergyStored(int energy) {
+            this.energy = Math.max(0, Math.min(energy, capacity));
+        }
     }
 }

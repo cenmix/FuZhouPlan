@@ -10,7 +10,7 @@ import org.fuzhou.fuzhouplan.menu.DryerMenu;
 
 public class DryerScreen extends AbstractContainerScreen<DryerMenu> {
 
-    private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.tryParse("textures/gui/container/furnace.png");
+    private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.tryParse("fuzhouplan:textures/gui/container/dryer.png");
 
     private static final int ENERGY_BAR_X = 13;
     private static final int ENERGY_BAR_Y = 20;

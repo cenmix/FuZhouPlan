@@ -4,14 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,26 +20,27 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 import org.fuzhou.fuzhouplan.menu.MolecularDistillationTowerMenu;
+import org.fuzhou.fuzhouplan.recipe.MachineRecipe;
+import org.fuzhou.fuzhouplan.recipe.ModRecipeTypes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class MolecularDistillationTowerBlockEntity extends BlockEntity implements MenuProvider {
 
-    // 配置参数
-    public static final int ENERGY_PER_OPERATION = 1000; // 每次操作消耗的FE
-    public static final int PROCESSING_TIME = 200; // 处理时间（ticks）
-    public static final int MAX_ENERGY = 100000; // 最大能量存储
+    public static final int DEFAULT_ENERGY_PER_OPERATION = 1000;
+    public static final int DEFAULT_PROCESSING_TIME = 200;
+    public static final int MAX_ENERGY = 100000;
 
-    // 物品槽位
     public static final int INPUT_SLOT = 0;
     public static final int OUTPUT_SLOT = 1;
     public static final int SLOT_COUNT = 2;
 
-    // 物品存储
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -49,72 +50,51 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
             if (slot == INPUT_SLOT) {
-                // 输入槽只接受蒸馏水
-                return stack.getItem() == Fuzhouplan.DISTILLED_WATER.get();
+                return true;
             }
             return slot == OUTPUT_SLOT;
         }
     };
 
-    // 能量存储
-    private final EnergyStorage energyStorage = new EnergyStorage(MAX_ENERGY) {
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            int received = super.receiveEnergy(maxReceive, simulate);
-            if (received > 0 && !simulate) {
-                setChanged();
-            }
-            return received;
-        }
+    private final MachineEnergyStorage energyStorage = new MachineEnergyStorage(MAX_ENERGY);
 
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0; // 不允许从该设备提取能量
-        }
-    };
-
-    // LazyOptional 缓存
-    private LazyOptional<ItemStackHandler> itemHandlerLazy = LazyOptional.of(() -> itemHandler);
+    private LazyOptional<IItemHandler> itemHandlerLazy = LazyOptional.of(() -> createSidedHandler());
     private LazyOptional<IEnergyStorage> energyStorageLazy = LazyOptional.of(() -> energyStorage);
 
-    // 处理进度
     private int processingProgress = 0;
     private boolean isProcessing = false;
+    private MachineRecipe currentRecipe = null;
 
     public MolecularDistillationTowerBlockEntity(BlockPos pos, BlockState state) {
         super(Fuzhouplan.MOLECULAR_DISTILLATION_TOWER_ENTITY.get(), pos, state);
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
 
-        // 检查是否可以开始处理
         if (!isProcessing) {
-            if (canStartProcessing()) {
+            if (canStartProcessing(level)) {
                 isProcessing = true;
                 processingProgress = 0;
             }
         }
 
-        // 处理中
         if (isProcessing) {
-            // 检查能量是否足够
-            if (energyStorage.getEnergyStored() >= ENERGY_PER_OPERATION / PROCESSING_TIME) {
-                // 每tick消耗一部分能量
-                int energyPerTick = ENERGY_PER_OPERATION / PROCESSING_TIME;
-                energyStorage.extractEnergy(energyPerTick, false);
-                processingProgress++;
+            int energyCost = currentRecipe != null ? currentRecipe.getEnergyCost() : DEFAULT_ENERGY_PER_OPERATION;
+            int processingTime = currentRecipe != null ? currentRecipe.getProcessingTime() : DEFAULT_PROCESSING_TIME;
+            int energyPerTick = energyCost / processingTime;
+            if (energyPerTick <= 0) energyPerTick = 1;
 
-                // 处理完成
-                if (processingProgress >= PROCESSING_TIME) {
+            if (energyStorage.getEnergyStored() >= energyPerTick) {
+                energyStorage.consumeEnergy(energyPerTick);
+                processingProgress++;
+                if (processingProgress >= processingTime) {
                     finishProcessing();
                     isProcessing = false;
                     processingProgress = 0;
+                    currentRecipe = null;
                 }
             } else {
-                // 能量不足，暂停处理
                 isProcessing = false;
                 processingProgress = 0;
             }
@@ -123,38 +103,43 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         setChanged();
     }
 
-    private boolean canStartProcessing() {
-        // 检查输入槽是否有蒸馏水
+    private boolean canStartProcessing(Level level) {
         ItemStack inputStack = itemHandler.getStackInSlot(INPUT_SLOT);
-        if (inputStack.isEmpty() || inputStack.getItem() != Fuzhouplan.DISTILLED_WATER.get()) {
-            return false;
-        }
+        if (inputStack.isEmpty()) return false;
 
-        // 检查输出槽是否有空间
+        SimpleContainer inputContainer = new SimpleContainer(inputStack);
+        Optional<MachineRecipe> recipeOpt = level.getRecipeManager()
+                .getRecipeFor(ModRecipeTypes.DISTILLING.get(), inputContainer, level);
+
+        if (recipeOpt.isEmpty()) return false;
+
+        MachineRecipe recipe = recipeOpt.get();
+        ItemStack output = recipe.getPrimaryOutput();
+
         ItemStack outputStack = itemHandler.getStackInSlot(OUTPUT_SLOT);
-        if (!outputStack.isEmpty() && outputStack.getItem() != Fuzhouplan.NUCLEASE_FREE_WATER.get()) {
-            return false;
+        if (!outputStack.isEmpty()) {
+            if (!ItemStack.isSameItemSameTags(outputStack, output)) return false;
+            if (outputStack.getCount() + output.getCount() > outputStack.getMaxStackSize()) return false;
         }
 
-        // 检查输出槽是否已满
-        if (!outputStack.isEmpty() && outputStack.getCount() >= outputStack.getMaxStackSize()) {
-            return false;
-        }
+        int energyCost = recipe.getEnergyCost();
+        if (energyCost > 0 && energyStorage.getEnergyStored() < energyCost) return false;
 
-        // 检查能量是否足够
-        return energyStorage.getEnergyStored() >= ENERGY_PER_OPERATION;
+        currentRecipe = recipe;
+        return true;
     }
 
     private void finishProcessing() {
-        // 消耗输入物品
+        if (currentRecipe == null) return;
+
         itemHandler.extractItem(INPUT_SLOT, 1, false);
 
-        // 产出输出物品
+        ItemStack output = currentRecipe.getPrimaryOutput();
         ItemStack outputStack = itemHandler.getStackInSlot(OUTPUT_SLOT);
         if (outputStack.isEmpty()) {
-            itemHandler.setStackInSlot(OUTPUT_SLOT, new ItemStack(Fuzhouplan.NUCLEASE_FREE_WATER.get(), 1));
+            itemHandler.setStackInSlot(OUTPUT_SLOT, output.copy());
         } else {
-            outputStack.grow(1);
+            outputStack.grow(output.getCount());
         }
     }
 
@@ -202,63 +187,18 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
     @Override
     public void reviveCaps() {
         super.reviveCaps();
-        itemHandlerLazy = LazyOptional.of(() -> itemHandler);
+        itemHandlerLazy = LazyOptional.of(this::createSidedHandler);
         energyStorageLazy = LazyOptional.of(() -> energyStorage);
     }
 
-    // 获取当前能量
     public int getEnergyStored() {
         return energyStorage.getEnergyStored();
     }
 
-    // 获取最大能量
     public int getMaxEnergyStored() {
         return energyStorage.getMaxEnergyStored();
     }
 
-    // 获取处理进度
-    public int getProcessingProgress() {
-        return processingProgress;
-    }
-
-    // 获取总处理时间
-    public int getTotalProcessingTime() {
-        return PROCESSING_TIME;
-    }
-
-    // 是否正在处理
-    public boolean isProcessing() {
-        return isProcessing;
-    }
-
-    // 插入物品（用于玩家交互）
-    public boolean insertItem(ItemStack stack) {
-        if (stack.getItem() == Fuzhouplan.DISTILLED_WATER.get()) {
-            ItemStack inputStack = itemHandler.getStackInSlot(INPUT_SLOT);
-            if (inputStack.isEmpty()) {
-                itemHandler.setStackInSlot(INPUT_SLOT, stack.split(1));
-                return true;
-            } else if (ItemStack.isSameItemSameTags(inputStack, stack) && inputStack.getCount() < inputStack.getMaxStackSize()) {
-                inputStack.grow(1);
-                stack.shrink(1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // 提取输出物品（用于玩家交互）
-    public ItemStack extractOutputItem() {
-        ItemStack outputStack = itemHandler.getStackInSlot(OUTPUT_SLOT);
-        if (!outputStack.isEmpty()) {
-            ItemStack result = outputStack.copy();
-            itemHandler.setStackInSlot(OUTPUT_SLOT, ItemStack.EMPTY);
-            return result;
-        }
-        return ItemStack.EMPTY;
-    }
-
-    // 物品丢弃（方块破坏时）
     public void drops() {
         SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
         for (int i = 0; i < itemHandler.getSlots(); i++) {
@@ -267,13 +207,14 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         Containers.dropContents(this.level, this.worldPosition, inventory);
     }
 
-    // 用于GUI的数据访问
+    private int syncedProcessingTime = DEFAULT_PROCESSING_TIME;
+
     protected final ContainerData dataAccess = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
                 case 0 -> MolecularDistillationTowerBlockEntity.this.processingProgress;
-                case 1 -> MolecularDistillationTowerBlockEntity.this.PROCESSING_TIME;
+                case 1 -> currentRecipe != null ? currentRecipe.getProcessingTime() : syncedProcessingTime;
                 case 2 -> MolecularDistillationTowerBlockEntity.this.getEnergyStored();
                 case 3 -> MolecularDistillationTowerBlockEntity.this.MAX_ENERGY;
                 case 4 -> MolecularDistillationTowerBlockEntity.this.isProcessing ? 1 : 0;
@@ -285,6 +226,9 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         public void set(int index, int value) {
             switch (index) {
                 case 0 -> MolecularDistillationTowerBlockEntity.this.processingProgress = value;
+                case 1 -> syncedProcessingTime = value;
+                case 2 -> energyStorage.setEnergyStored(value);
+                case 3 -> { }
                 case 4 -> MolecularDistillationTowerBlockEntity.this.isProcessing = value != 0;
             }
         }
@@ -313,5 +257,75 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return new MolecularDistillationTowerMenu(containerId, inventory, this);
+    }
+
+    private IItemHandler createSidedHandler() {
+        return new IItemHandler() {
+            @Override
+            public int getSlots() {
+                return itemHandler.getSlots();
+            }
+
+            @Override
+            public ItemStack getStackInSlot(int slot) {
+                return itemHandler.getStackInSlot(slot);
+            }
+
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (slot != INPUT_SLOT) return stack;
+                return itemHandler.insertItem(slot, stack, simulate);
+            }
+
+            @Override
+            public ItemStack extractItem(int slot, int amount, boolean simulate) {
+                if (slot != OUTPUT_SLOT) return ItemStack.EMPTY;
+                return itemHandler.extractItem(slot, amount, simulate);
+            }
+
+            @Override
+            public int getSlotLimit(int slot) {
+                return itemHandler.getSlotLimit(slot);
+            }
+
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return itemHandler.isItemValid(slot, stack);
+            }
+        };
+    }
+
+    private class MachineEnergyStorage extends EnergyStorage {
+        public MachineEnergyStorage(int capacity) {
+            super(capacity);
+        }
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            int received = super.receiveEnergy(maxReceive, simulate);
+            if (received > 0 && !simulate) {
+                setChanged();
+            }
+            return received;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+
+        public void consumeEnergy(int amount) {
+            this.energy = Math.max(0, this.energy - amount);
+            setChanged();
+        }
+
+        public void setEnergyStored(int energy) {
+            this.energy = Math.max(0, Math.min(energy, capacity));
+        }
     }
 }

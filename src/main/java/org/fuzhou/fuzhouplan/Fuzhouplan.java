@@ -28,6 +28,8 @@ import org.fuzhou.fuzhouplan.item.GlowingBlueDyeBucketItem;
 import org.fuzhou.fuzhouplan.item.GlowingBlueDyeItem;
 import org.fuzhou.fuzhouplan.fluid.GlowingBlueDyeFluid;
 import org.fuzhou.fuzhouplan.fluid.GlowingBlueDyeFluidType;
+import org.fuzhou.fuzhouplan.fluid.GreenAnestheticFluid;
+import org.fuzhou.fuzhouplan.fluid.GreenAnestheticFluidType;
 import org.fuzhou.fuzhouplan.item.DNACanRegistry;
 import org.fuzhou.fuzhouplan.item.DNACanItem;
 import org.fuzhou.fuzhouplan.item.UnresolvedDNACanItem;
@@ -37,8 +39,10 @@ import org.fuzhou.fuzhouplan.block.FermentationBarrelBlock;
 import org.fuzhou.fuzhouplan.block.MolecularDistillationTowerBlock;
 import org.fuzhou.fuzhouplan.block.PrecisionStirrerBlock;
 import org.fuzhou.fuzhouplan.block.DryerBlock;
+import org.fuzhou.fuzhouplan.block.InfiniteGeneratorBlock;
 import org.fuzhou.fuzhouplan.block.ResolverBlock;
 import org.fuzhou.fuzhouplan.blockentity.FermentationBarrelBlockEntity;
+import org.fuzhou.fuzhouplan.blockentity.InfiniteGeneratorBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.MolecularDistillationTowerBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.PrecisionStirrerBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.DryerBlockEntity;
@@ -49,6 +53,7 @@ import org.fuzhou.fuzhouplan.menu.MolecularDistillationTowerMenu;
 import org.fuzhou.fuzhouplan.menu.DryerMenu;
 import org.fuzhou.fuzhouplan.menu.ResolverMenu;
 import org.fuzhou.fuzhouplan.network.NetworkHandler;
+import org.fuzhou.fuzhouplan.recipe.ModRecipeTypes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -110,6 +115,16 @@ public class Fuzhouplan {
     public static final RegistryObject<GlowingBlueDyeFluid.Flowing> GLOWING_BLUE_DYE_FLOWING = FLUIDS.register("flowing_glowing_blue_dye", () -> new GlowingBlueDyeFluid.Flowing(GlowingBlueDyeFluid.makeProperties()));
 
     public static final RegistryObject<LiquidBlock> GLOWING_BLUE_DYE_BLOCK = BLOCKS.register("glowing_blue_dye", () -> new LiquidBlock(GLOWING_BLUE_DYE_SOURCE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.WATER).noCollission().strength(100.0F).noLootTable()));
+
+    // 绿色麻醉液流体
+    public static final RegistryObject<Item> GREEN_ANESTHETIC_BUCKET = ITEMS.register("green_anesthetic_bucket", () -> new BucketItem(GreenAnestheticFluid.SOURCE, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<FluidType> GREEN_ANESTHETIC_FLUID_TYPE = FLUID_TYPES.register("green_anesthetic", GreenAnestheticFluidType::new);
+
+    public static final RegistryObject<GreenAnestheticFluid.Source> GREEN_ANESTHETIC_SOURCE = FLUIDS.register("green_anesthetic", () -> new GreenAnestheticFluid.Source(GreenAnestheticFluid.makeProperties()));
+    public static final RegistryObject<GreenAnestheticFluid.Flowing> GREEN_ANESTHETIC_FLOWING = FLUIDS.register("flowing_green_anesthetic", () -> new GreenAnestheticFluid.Flowing(GreenAnestheticFluid.makeProperties()));
+
+    public static final RegistryObject<LiquidBlock> GREEN_ANESTHETIC_BLOCK = BLOCKS.register("green_anesthetic", () -> new LiquidBlock(GREEN_ANESTHETIC_SOURCE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.PLANT).noCollission().strength(100.0F).noLootTable()));
 
     // Task 1: 基础物品注册
     public static final RegistryObject<Item> IRON_CAN = ITEMS.register("iron_can", () -> new Item(new Item.Properties().stacksTo(64)));
@@ -181,6 +196,14 @@ public class Fuzhouplan {
     public static final RegistryObject<MenuType<ResolverMenu>> RESOLVER_MENU = MENUS.register("resolver",
             () -> IForgeMenuType.create(ResolverMenu::new));
 
+    // 无限发电机
+    public static final RegistryObject<Block> INFINITE_GENERATOR = BLOCKS.register("infinite_generator",
+            () -> new InfiniteGeneratorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f).sound(net.minecraft.world.level.block.SoundType.METAL).lightLevel(state -> 15)));
+    public static final RegistryObject<Item> INFINITE_GENERATOR_ITEM = ITEMS.register("infinite_generator",
+            () -> new BlockItem(INFINITE_GENERATOR.get(), new Item.Properties()));
+    public static final RegistryObject<BlockEntityType<InfiniteGeneratorBlockEntity>> INFINITE_GENERATOR_ENTITY = BLOCK_ENTITIES.register("infinite_generator",
+            () -> BlockEntityType.Builder.of(InfiniteGeneratorBlockEntity::new, INFINITE_GENERATOR.get()).build(null));
+
     public static final RegistryObject<CreativeModeTab> FUZHOU_TAB = CREATIVE_MODE_TABS.register("fuzhou_tab", () -> CreativeModeTab.builder().withTabsBefore(CreativeModeTabs.COMBAT).icon(() -> BIO_ANESTHETIC.get().getDefaultInstance()).title(Component.translatable("itemGroup.fuzhouplan")).displayItems((parameters, output) -> {
         output.accept(SYRINGE.get());
         output.accept(BIO_ANESTHETIC.get());
@@ -204,6 +227,7 @@ public class Fuzhouplan {
         output.accept(BLUE_BERRY.get());
         output.accept(GLOWING_BLUE_DYE_BUCKET.get());
         output.accept(GLOWING_BLUE_DYE.get());
+        output.accept(GREEN_ANESTHETIC_BUCKET.get());
         for (UnresolvedDNACanItem item : DNACanRegistry.getAllUnresolvedCans().values()) {
             output.accept(item);
         }
@@ -220,6 +244,8 @@ public class Fuzhouplan {
         output.accept(DRYER_ITEM.get());
         // 解析器
         output.accept(RESOLVER_ITEM.get());
+        // 无限发电机
+        output.accept(INFINITE_GENERATOR_ITEM.get());
     }).build());
 
     public Fuzhouplan() {
@@ -232,6 +258,8 @@ public class Fuzhouplan {
         MENUS.register(modEventBus);
         FLUID_TYPES.register(modEventBus);
         FLUIDS.register(modEventBus);
+        ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
+        ModRecipeTypes.SERIALIZERS.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -263,6 +291,8 @@ public class Fuzhouplan {
                 ItemBlockRenderTypes.setRenderLayer(BLUE_BERRY_BUSH.get(), RenderType.cutout());
                 ItemBlockRenderTypes.setRenderLayer(GLOWING_BLUE_DYE_SOURCE.get(), RenderType.translucent());
                 ItemBlockRenderTypes.setRenderLayer(GLOWING_BLUE_DYE_FLOWING.get(), RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(GREEN_ANESTHETIC_SOURCE.get(), RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(GREEN_ANESTHETIC_FLOWING.get(), RenderType.translucent());
                 MenuScreens.register(PRECISION_STIRRER_MENU.get(), PrecisionStirrerScreen::new);
                 MenuScreens.register(FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
                 MenuScreens.register(MOLECULAR_DISTILLATION_TOWER_MENU.get(), MolecularDistillationTowerScreen::new);

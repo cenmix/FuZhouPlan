@@ -12,44 +12,39 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 import org.fuzhou.fuzhouplan.block.FermentationBarrelBlock;
 import org.fuzhou.fuzhouplan.menu.FermentationBarrelMenu;
+import org.fuzhou.fuzhouplan.recipe.MachineRecipe;
+import org.fuzhou.fuzhouplan.recipe.ModRecipeTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
-/**
- * 发酵桶方块实体
- * 实现发酵逻辑：
- * - 腐肉 → 氨水瓶（48000 ticks = 2个游戏日）
- * - 小麦 → 醋瓶（24000 ticks = 1个游戏日）
- * 
- * 单槽设计：发酵完成后直接替换物品
- */
 public class FermentationBarrelBlockEntity extends BlockEntity implements WorldlyContainer, MenuProvider {
 
-    // 发酵时间常量（ticks）
-    public static final int ROTTON_FLESH_FERMENT_TIME = 2400;
-    public static final int WHEAT_FERMENT_TIME = 1200;
+    public static final int DEFAULT_FERMENT_TIME = 2400;
+    public static final int MAX_ENERGY = 50000;
+    public static final int ENERGY_PER_SPEED_LEVEL = 5000;
+    public static final int ENERGY_COST_PER_LEVEL = 20;
+    public static final int MAX_SPEED_MULTIPLIER = 10;
 
-    // 槽位定义
     public static final int SLOT = 0;
     public static final int SLOT_COUNT = 1;
 
-    // 物品存储
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -58,24 +53,28 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
 
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return stack.getItem() == Items.ROTTEN_FLESH || stack.getItem() == Items.WHEAT;
+            return true;
         }
     };
 
+    private final MachineEnergyStorage energyStorage = new MachineEnergyStorage(MAX_ENERGY);
+
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
+    private LazyOptional<IEnergyStorage> energyStorageLazy = LazyOptional.of(() -> energyStorage);
 
-    // 发酵状态
     private int fermentProgress = 0;
-    private int fermentTime = 0; // 总发酵时间
-    private Item currentInputItem = null;
+    private int fermentTime = 0;
+    private MachineRecipe currentRecipe = null;
 
-    // 用于GUI的数据访问
     protected final ContainerData dataAccess = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
                 case 0 -> FermentationBarrelBlockEntity.this.fermentProgress;
                 case 1 -> FermentationBarrelBlockEntity.this.fermentTime;
+                case 2 -> FermentationBarrelBlockEntity.this.getEnergyStored();
+                case 3 -> FermentationBarrelBlockEntity.this.MAX_ENERGY;
+                case 4 -> FermentationBarrelBlockEntity.this.getSpeedMultiplier();
                 default -> 0;
             };
         }
@@ -85,12 +84,15 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
             switch (index) {
                 case 0 -> FermentationBarrelBlockEntity.this.fermentProgress = value;
                 case 1 -> FermentationBarrelBlockEntity.this.fermentTime = value;
+                case 2 -> energyStorage.setEnergyStored(value);
+                case 3 -> { }
+                case 4 -> { }
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 5;
         }
     };
 
@@ -109,101 +111,92 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
         return new FermentationBarrelMenu(containerId, inventory, this);
     }
 
-    // 方块实体tick逻辑
     public static void tick(Level level, BlockPos pos, BlockState state, FermentationBarrelBlockEntity blockEntity) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
 
         ItemStack stack = blockEntity.itemHandler.getStackInSlot(SLOT);
 
-        // 更新方块状态：有物品时显示有产出贴图
         int hasOutput = blockEntity.isResultItem(stack) ? 1 : 0;
         if (state.getValue(FermentationBarrelBlock.HAS_OUTPUT) != hasOutput) {
             level.setBlock(pos, state.setValue(FermentationBarrelBlock.HAS_OUTPUT, hasOutput), 2);
         }
 
-        // 检查是否有有效的输入物品（腐肉或小麦）
-        if (blockEntity.isValidInput(stack)) {
-            // 初始化发酵
-            if (blockEntity.currentInputItem == null || blockEntity.currentInputItem != stack.getItem()) {
-                blockEntity.currentInputItem = stack.getItem();
-                blockEntity.fermentProgress = 0;
-                blockEntity.fermentTime = blockEntity.getFermentTimeForItem(stack.getItem());
-            }
+        if (!stack.isEmpty()) {
+            SimpleContainer inputContainer = new SimpleContainer(stack);
+            Optional<MachineRecipe> recipeOpt = level.getRecipeManager()
+                    .getRecipeFor(ModRecipeTypes.FERMENTING.get(), inputContainer, level);
 
-            // 进行发酵
-            blockEntity.fermentProgress++;
-            blockEntity.setChanged();
+            if (recipeOpt.isPresent()) {
+                MachineRecipe recipe = recipeOpt.get();
+                if (blockEntity.currentRecipe == null || blockEntity.currentRecipe != recipe) {
+                    blockEntity.currentRecipe = recipe;
+                    blockEntity.fermentProgress = 0;
+                    blockEntity.fermentTime = recipe.getProcessingTime();
+                }
 
-            // 发酵完成
-            if (blockEntity.fermentProgress >= blockEntity.fermentTime) {
-                blockEntity.finishFermentation();
+                int speedMultiplier = blockEntity.getSpeedMultiplier();
+                int energyToConsume = (speedMultiplier - 1) * ENERGY_COST_PER_LEVEL;
+                if (energyToConsume > 0 && blockEntity.energyStorage.getEnergyStored() >= energyToConsume) {
+                    blockEntity.energyStorage.consumeEnergy(energyToConsume);
+                    blockEntity.fermentProgress += speedMultiplier;
+                } else {
+                    blockEntity.fermentProgress++;
+                }
+                blockEntity.setChanged();
+
+                if (blockEntity.fermentProgress >= blockEntity.fermentTime) {
+                    blockEntity.finishFermentation();
+                }
+            } else {
+                if (blockEntity.fermentProgress > 0) {
+                    blockEntity.fermentProgress = 0;
+                    blockEntity.currentRecipe = null;
+                    blockEntity.fermentTime = 0;
+                    blockEntity.setChanged();
+                }
             }
         } else {
-            // 无有效输入，重置进度
             if (blockEntity.fermentProgress > 0) {
                 blockEntity.fermentProgress = 0;
-                blockEntity.currentInputItem = null;
+                blockEntity.currentRecipe = null;
                 blockEntity.fermentTime = 0;
                 blockEntity.setChanged();
             }
         }
     }
 
-    private boolean isValidInput(ItemStack stack) {
-        return !stack.isEmpty() && (stack.getItem() == Items.ROTTEN_FLESH || stack.getItem() == Items.WHEAT);
+    public int getSpeedMultiplier() {
+        int speedLevel = energyStorage.getEnergyStored() / ENERGY_PER_SPEED_LEVEL;
+        return Math.min(MAX_SPEED_MULTIPLIER, 1 + speedLevel);
     }
 
     private boolean isResultItem(ItemStack stack) {
-        return !stack.isEmpty() && (stack.getItem() == Fuzhouplan.AMMONIA_BOTTLE.get() || stack.getItem() == Fuzhouplan.VINEGAR_BOTTLE.get());
-    }
-
-    private int getFermentTimeForItem(Item item) {
-        if (item == Items.ROTTEN_FLESH) {
-            return ROTTON_FLESH_FERMENT_TIME;
-        } else if (item == Items.WHEAT) {
-            return WHEAT_FERMENT_TIME;
-        }
-        return 0;
-    }
-
-    @Nullable
-    private Item getResultItem(Item inputItem) {
-        if (inputItem == Items.ROTTEN_FLESH) {
-            return Fuzhouplan.AMMONIA_BOTTLE.get();
-        } else if (inputItem == Items.WHEAT) {
-            return Fuzhouplan.VINEGAR_BOTTLE.get();
-        }
-        return null;
+        if (stack.isEmpty() || level == null) return false;
+        SimpleContainer inputContainer = new SimpleContainer(stack);
+        return level.getRecipeManager().getRecipeFor(ModRecipeTypes.FERMENTING.get(), inputContainer, level).isEmpty();
     }
 
     private void finishFermentation() {
+        if (currentRecipe == null) return;
+
         ItemStack stack = itemHandler.getStackInSlot(SLOT);
-        Item resultItem = getResultItem(currentInputItem);
+        ItemStack output = currentRecipe.getPrimaryOutput();
+        int outputCount = Math.min(output.getCount() * stack.getCount(), output.getMaxStackSize());
+        itemHandler.setStackInSlot(SLOT, new ItemStack(output.getItem(), outputCount));
 
-        if (resultItem != null) {
-            // 直接替换为输出物品
-            itemHandler.setStackInSlot(SLOT, new ItemStack(resultItem, stack.getCount()));
-
-            // 重置发酵状态
-            fermentProgress = 0;
-            currentInputItem = null;
-            fermentTime = 0;
-            setChanged();
-        }
+        fermentProgress = 0;
+        currentRecipe = null;
+        fermentTime = 0;
+        setChanged();
     }
 
-    // NBT数据保存和加载
     @Override
     public void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.put("inventory", itemHandler.serializeNBT());
         tag.putInt("fermentProgress", fermentProgress);
         tag.putInt("fermentTime", fermentTime);
-        if (currentInputItem != null) {
-            tag.putString("currentInputItem", currentInputItem.builtInRegistryHolder().key().location().toString());
-        }
+        tag.putInt("Energy", energyStorage.getEnergyStored());
     }
 
     @Override
@@ -212,13 +205,11 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
         itemHandler.deserializeNBT(tag.getCompound("inventory"));
         fermentProgress = tag.getInt("fermentProgress");
         fermentTime = tag.getInt("fermentTime");
-        String itemKey = tag.getString("currentInputItem");
-        if (!itemKey.isEmpty()) {
-            currentInputItem = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(itemKey));
+        if (tag.contains("Energy")) {
+            energyStorage.receiveEnergy(tag.getInt("Energy"), false);
         }
     }
 
-    // 物品丢弃（方块破坏时）
     public void drops() {
         SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
         for (int i = 0; i < itemHandler.getSlots(); i++) {
@@ -227,7 +218,6 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
         Containers.dropContents(this.level, this.worldPosition, inventory);
     }
 
-    // WorldlyContainer 实现
     @Override
     public int[] getSlotsForFace(Direction side) {
         return new int[]{SLOT};
@@ -235,12 +225,12 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
 
     @Override
     public boolean canPlaceItemThroughFace(int index, ItemStack itemStack, @Nullable Direction direction) {
-        return isValidInput(itemStack);
+        return !itemStack.isEmpty();
     }
 
     @Override
     public boolean canTakeItemThroughFace(int index, ItemStack stack, Direction direction) {
-        return isResultItem(stack);
+        return fermentProgress <= 0;
     }
 
     @Override
@@ -293,12 +283,14 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
         }
     }
 
-    // Capability支持
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return lazyItemHandler.cast();
+        }
+        if (cap == ForgeCapabilities.ENERGY) {
+            return energyStorageLazy.cast();
         }
         return super.getCapability(cap, side);
     }
@@ -313,19 +305,26 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
     public void invalidateCaps() {
         super.invalidateCaps();
         lazyItemHandler.invalidate();
+        energyStorageLazy.invalidate();
     }
 
     @Override
     public void reviveCaps() {
         super.reviveCaps();
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
+        energyStorageLazy = LazyOptional.of(() -> energyStorage);
     }
 
-    // 获取进度百分比（用于显示）
+    public int getEnergyStored() {
+        return energyStorage.getEnergyStored();
+    }
+
+    public int getMaxEnergyStored() {
+        return energyStorage.getMaxEnergyStored();
+    }
+
     public float getProgressPercent() {
-        if (fermentTime == 0) {
-            return 0.0f;
-        }
+        if (fermentTime == 0) return 0.0f;
         return (float) fermentProgress / fermentTime;
     }
 
@@ -339,5 +338,39 @@ public class FermentationBarrelBlockEntity extends BlockEntity implements Worldl
 
     public ContainerData getDataAccess() {
         return dataAccess;
+    }
+
+    private class MachineEnergyStorage extends EnergyStorage {
+        public MachineEnergyStorage(int capacity) {
+            super(capacity);
+        }
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            int received = super.receiveEnergy(maxReceive, simulate);
+            if (received > 0 && !simulate) {
+                setChanged();
+            }
+            return received;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+
+        public void consumeEnergy(int amount) {
+            this.energy = Math.max(0, this.energy - amount);
+            setChanged();
+        }
+
+        public void setEnergyStored(int energy) {
+            this.energy = Math.max(0, Math.min(energy, capacity));
+        }
     }
 }

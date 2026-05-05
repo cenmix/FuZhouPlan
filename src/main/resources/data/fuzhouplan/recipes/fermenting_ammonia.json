@@ -1,0 +1,6 @@
+{
+  "type": "fuzhouplan:fermenting",
+  "input": { "item": "minecraft:rotten_flesh" },
+  "primary_output": { "item": "fuzhouplan:ammonia_bottle" },
+  "processing_time": 2400
+}
