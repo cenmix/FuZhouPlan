@@ -15,6 +15,10 @@
   "item.fuzhouplan.glowing_blue_dye": "Glowing Blue Dye",
   "item.fuzhouplan.glowing_blue_dye.tooltip": "A fluorescent blue dye",
   "item.fuzhouplan.glowing_blue_dye.tooltip.usage": "Used in the Resolver to resolve DNA Storage Cans",
+  "item.fuzhouplan.green_anesthetic_bucket": "Green Anesthetic Bucket",
+  "item.fuzhouplan.green_anesthetic_bucket.tooltip": "Green liquid with anesthetic properties",
+  "item.fuzhouplan.green_anesthetic_bucket.tooltip.usage": "Craft with Syringe to make Bio Anesthetic",
+  "block.fuzhouplan.green_anesthetic": "Green Anesthetic Fluid",
   "item.fuzhouplan.bio_anesthetic": "Bio Anesthetic",
   "item.fuzhouplan.bio_anesthetic.tooltip.line1": "A powerful anesthetic for immobilizing creatures.",
   "item.fuzhouplan.bio_anesthetic.tooltip.line2": "Only works on creatures with max health ≤ %s",
@@ -66,5 +70,7 @@
   "block.fuzhouplan.dryer": "Dryer",
   "block.fuzhouplan.dryer.tooltip": "Dries liquid containers, separating liquid from container",
   "block.fuzhouplan.resolver": "Resolver",
-  "block.fuzhouplan.resolver.tooltip": "Uses Glowing Blue Dye to resolve Unresolved DNA Cans"
+  "block.fuzhouplan.resolver.tooltip": "Uses Glowing Blue Dye to resolve Unresolved DNA Cans",
+  "block.fuzhouplan.infinite_generator": "Infinite Generator",
+  "block.fuzhouplan.infinite_generator.tooltip": "Ultimate power generation device with infinite energy output"
 }

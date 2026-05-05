@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "fuzhouplan:green_anesthetic_bucket" },
+    { "item": "fuzhouplan:syringe" }
+  ],
+  "result": { "item": "fuzhouplan:bio_anesthetic", "count": 1 }
+}
