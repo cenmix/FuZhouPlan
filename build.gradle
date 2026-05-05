@@ -97,6 +97,8 @@ minecraft {
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
+            // Disable narrator to prevent crash on macOS 10.15 Catalina (objc_msgSend SIGSEGV in text2speech)
+            arg '--noNarrator'
         }
 
         server {
