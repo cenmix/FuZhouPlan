@@ -72,5 +72,13 @@
   "block.fuzhouplan.resolver": "Resolver",
   "block.fuzhouplan.resolver.tooltip": "Uses Glowing Blue Dye to resolve Unresolved DNA Cans",
   "block.fuzhouplan.infinite_generator": "Infinite Generator",
-  "block.fuzhouplan.infinite_generator.tooltip": "Ultimate power generation device with infinite energy output"
+  "block.fuzhouplan.infinite_generator.tooltip": "Ultimate power generation device with infinite energy output",
+
+  "itemGroup.fuzhouplan_molecular_items": "Fuzhou Plan - Molecular Items",
+  "item.fuzhouplan.molecular_material": "Molecular Material",
+  "item.fuzhouplan.molecular_helmet": "Molecular Helmet",
+  "item.fuzhouplan.molecular_chestplate": "Molecular Chestplate",
+  "item.fuzhouplan.molecular_leggings": "Molecular Leggings",
+  "item.fuzhouplan.molecular_boots": "Molecular Boots",
+  "item.fuzhouplan.molecular_armor.tooltip": "Armor made of molecular material. Lightweight, sturdy, and invisible when worn..."
 }

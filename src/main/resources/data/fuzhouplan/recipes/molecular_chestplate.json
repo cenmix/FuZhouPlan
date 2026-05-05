@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X X",
+    "XXX",
+    "XXX"
+  ],
+  "key": {
+    "X": {
+      "item": "fuzhouplan:molecular_material"
+    }
+  },
+  "result": {
+    "item": "fuzhouplan:molecular_chestplate",
+    "count": 1
+  }
+}

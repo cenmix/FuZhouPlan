@@ -14,12 +14,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidType;
 import org.fuzhou.fuzhouplan.item.BioAnestheticItem;
+import org.fuzhou.fuzhouplan.item.MolecularArmorItem;
 import org.fuzhou.fuzhouplan.item.BioGeneExtractorItem;
 import org.fuzhou.fuzhouplan.item.SyringeItem;
 import org.fuzhou.fuzhouplan.item.GreenBerryItem;
@@ -126,6 +128,21 @@ public class Fuzhouplan {
 
     public static final RegistryObject<LiquidBlock> GREEN_ANESTHETIC_BLOCK = BLOCKS.register("green_anesthetic", () -> new LiquidBlock(GREEN_ANESTHETIC_SOURCE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.PLANT).noCollission().strength(100.0F).noLootTable()));
 
+    // 分子材料注册
+    public static final RegistryObject<Item> MOLECULAR_MATERIAL = ITEMS.register("molecular_material", () -> new Item(new Item.Properties().stacksTo(64)));
+
+    // 分子盔甲注册
+    public static final RegistryObject<Item> MOLECULAR_HELMET = ITEMS.register("molecular_helmet",
+            () -> new MolecularArmorItem(ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistryObject<Item> MOLECULAR_CHESTPLATE = ITEMS.register("molecular_chestplate",
+            () -> new MolecularArmorItem(ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistryObject<Item> MOLECULAR_LEGGINGS = ITEMS.register("molecular_leggings",
+            () -> new MolecularArmorItem(ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final RegistryObject<Item> MOLECULAR_BOOTS = ITEMS.register("molecular_boots",
+            () -> new MolecularArmorItem(ArmorItem.Type.BOOTS, new Item.Properties()));
+
+
+
     // Task 1: 基础物品注册
     public static final RegistryObject<Item> IRON_CAN = ITEMS.register("iron_can", () -> new Item(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> LIME_POWDER = ITEMS.register("lime_powder", () -> new Item(new Item.Properties().stacksTo(64)));
@@ -204,6 +221,7 @@ public class Fuzhouplan {
     public static final RegistryObject<BlockEntityType<InfiniteGeneratorBlockEntity>> INFINITE_GENERATOR_ENTITY = BLOCK_ENTITIES.register("infinite_generator",
             () -> BlockEntityType.Builder.of(InfiniteGeneratorBlockEntity::new, INFINITE_GENERATOR.get()).build(null));
 
+    //创造模式物品栏标签页 #1
     public static final RegistryObject<CreativeModeTab> FUZHOU_TAB = CREATIVE_MODE_TABS.register("fuzhou_tab", () -> CreativeModeTab.builder().withTabsBefore(CreativeModeTabs.COMBAT).icon(() -> BIO_ANESTHETIC.get().getDefaultInstance()).title(Component.translatable("itemGroup.fuzhouplan")).displayItems((parameters, output) -> {
         output.accept(SYRINGE.get());
         output.accept(BIO_ANESTHETIC.get());
@@ -246,6 +264,17 @@ public class Fuzhouplan {
         output.accept(RESOLVER_ITEM.get());
         // 无限发电机
         output.accept(INFINITE_GENERATOR_ITEM.get());
+    }).build());
+
+    //创造模式物品栏 #2 分子物品
+    public static final RegistryObject<CreativeModeTab> FUZHOU_TAB_MOLECULAR_ITEMS = CREATIVE_MODE_TABS.register("fuzhou_tab_molecular_items", () -> CreativeModeTab.builder().withTabsAfter(FUZHOU_TAB.getId()).icon(() -> MOLECULAR_MATERIAL.get().getDefaultInstance()).title(Component.translatable("itemGroup.fuzhouplan_molecular_items")).displayItems((parameters, output) -> {
+        output.accept(MOLECULAR_MATERIAL.get());
+        // 分子盔甲
+        output.accept(MOLECULAR_HELMET.get());
+        output.accept(MOLECULAR_CHESTPLATE.get());
+        output.accept(MOLECULAR_LEGGINGS.get());
+        output.accept(MOLECULAR_BOOTS.get());
+
     }).build());
 
     public Fuzhouplan() {

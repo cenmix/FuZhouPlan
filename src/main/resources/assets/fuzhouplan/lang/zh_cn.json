@@ -72,5 +72,12 @@
   "block.fuzhouplan.resolver": "解析器",
   "block.fuzhouplan.resolver.tooltip": "使用发光蓝色染料解析未解析的DNA储存罐",
   "block.fuzhouplan.infinite_generator": "无限发电机",
-  "block.fuzhouplan.infinite_generator.tooltip": "无限输出能量的终极发电设备"
+  "block.fuzhouplan.infinite_generator.tooltip": "无限输出能量的终极发电设备",
+  "itemGroup.fuzhouplan_molecular_items": "浮舟计划 - 分子物品",
+  "item.fuzhouplan.molecular_material": "分子材料",
+  "item.fuzhouplan.molecular_helmet": "分子头盔",
+  "item.fuzhouplan.molecular_chestplate": "分子胸甲",
+  "item.fuzhouplan.molecular_leggings": "分子护腿",
+  "item.fuzhouplan.molecular_boots": "分子靴子",
+  "item.fuzhouplan.molecular_armor.tooltip": "这是由分子材料构成的盔甲，质轻、坚固，穿上后看不出与平常时的区别..."
 }
