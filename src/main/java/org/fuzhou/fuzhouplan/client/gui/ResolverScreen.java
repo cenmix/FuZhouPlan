@@ -10,7 +10,7 @@ import org.fuzhou.fuzhouplan.menu.ResolverMenu;
 
 public class ResolverScreen extends AbstractContainerScreen<ResolverMenu> {
 
-    private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.tryParse("textures/gui/container/furnace.png");
+    private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.tryParse("fuzhouplan:textures/gui/container/resolver.png");
 
     private static final int ENERGY_BAR_X = 13;
     private static final int ENERGY_BAR_Y = 20;

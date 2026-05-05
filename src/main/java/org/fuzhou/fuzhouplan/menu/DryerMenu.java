@@ -9,7 +9,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
 import org.fuzhou.fuzhouplan.blockentity.DryerBlockEntity;
@@ -24,11 +23,9 @@ public class DryerMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
         this.data = blockEntity.getDataAccess();
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            addSlot(new SlotItemHandler(handler, DryerBlockEntity.INPUT_SLOT, 56, 17));
-            addSlot(new SlotItemHandler(handler, DryerBlockEntity.OUTPUT_SLOT_1, 110, 35));
-            addSlot(new SlotItemHandler(handler, DryerBlockEntity.OUTPUT_SLOT_2, 130, 35));
-        });
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), DryerBlockEntity.INPUT_SLOT, 56, 35));
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), DryerBlockEntity.OUTPUT_SLOT_1, 110, 35));
+        addSlot(new SlotItemHandler(blockEntity.getItemHandler(), DryerBlockEntity.OUTPUT_SLOT_2, 130, 35));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
