@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IDI", "DRD", "IEI"],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "D": { "item": "fuzhouplan:glowing_blue_dye" },
+    "R": { "item": "minecraft:redstone_block" },
+    "E": { "item": "minecraft:ender_pearl" }
+  },
+  "result": { "item": "fuzhouplan:resolver", "count": 1 }
+}

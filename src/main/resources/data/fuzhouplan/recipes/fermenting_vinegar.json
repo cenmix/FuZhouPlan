@@ -1,0 +1,6 @@
+{
+  "type": "fuzhouplan:fermenting",
+  "input": { "item": "minecraft:wheat" },
+  "primary_output": { "item": "fuzhouplan:vinegar_bottle" },
+  "processing_time": 1200
+}

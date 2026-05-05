@@ -12,21 +12,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
-import org.fuzhou.fuzhouplan.blockentity.MolecularDistillationTowerBlockEntity;
+import org.fuzhou.fuzhouplan.blockentity.DryerBlockEntity;
 
-public class MolecularDistillationTowerMenu extends AbstractContainerMenu {
+public class DryerMenu extends AbstractContainerMenu {
 
-    private final MolecularDistillationTowerBlockEntity blockEntity;
+    private final DryerBlockEntity blockEntity;
     private final ContainerData data;
 
-    public MolecularDistillationTowerMenu(int containerId, Inventory inventory, MolecularDistillationTowerBlockEntity blockEntity) {
-        super(Fuzhouplan.MOLECULAR_DISTILLATION_TOWER_MENU.get(), containerId);
+    public DryerMenu(int containerId, Inventory inventory, DryerBlockEntity blockEntity) {
+        super(Fuzhouplan.DRYER_MENU.get(), containerId);
         this.blockEntity = blockEntity;
         this.data = blockEntity.getDataAccess();
 
         blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            addSlot(new SlotItemHandler(handler, MolecularDistillationTowerBlockEntity.INPUT_SLOT, 56, 35));
-            addSlot(new SlotItemHandler(handler, MolecularDistillationTowerBlockEntity.OUTPUT_SLOT, 116, 35));
+            addSlot(new SlotItemHandler(handler, DryerBlockEntity.INPUT_SLOT, 56, 17));
+            addSlot(new SlotItemHandler(handler, DryerBlockEntity.OUTPUT_SLOT_1, 110, 35));
+            addSlot(new SlotItemHandler(handler, DryerBlockEntity.OUTPUT_SLOT_2, 130, 35));
         });
 
         for (int row = 0; row < 3; row++) {
@@ -42,16 +43,16 @@ public class MolecularDistillationTowerMenu extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
-    public MolecularDistillationTowerMenu(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
+    public DryerMenu(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
         this(containerId, inventory, getBlockEntity(inventory, buffer.readBlockPos()));
     }
 
-    private static MolecularDistillationTowerBlockEntity getBlockEntity(Inventory inventory, BlockPos pos) {
+    private static DryerBlockEntity getBlockEntity(Inventory inventory, BlockPos pos) {
         BlockEntity blockEntity = inventory.player.level().getBlockEntity(pos);
-        if (blockEntity instanceof MolecularDistillationTowerBlockEntity) {
-            return (MolecularDistillationTowerBlockEntity) blockEntity;
+        if (blockEntity instanceof DryerBlockEntity) {
+            return (DryerBlockEntity) blockEntity;
         }
-        throw new IllegalStateException("Block entity is not a MolecularDistillationTowerBlockEntity at " + pos);
+        throw new IllegalStateException("Block entity is not a DryerBlockEntity at " + pos);
     }
 
     @Override
@@ -63,12 +64,12 @@ public class MolecularDistillationTowerMenu extends AbstractContainerMenu {
             ItemStack slotStack = slot.getItem();
             itemStack = slotStack.copy();
 
-            if (index < 2) {
-                if (!this.moveItemStackTo(slotStack, 2, 38, true)) {
+            if (index < 3) {
+                if (!this.moveItemStackTo(slotStack, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (!this.moveItemStackTo(slotStack, 0, 2, false)) {
+                if (!this.moveItemStackTo(slotStack, 0, 1, false)) {
                     return ItemStack.EMPTY;
                 }
             }
@@ -98,7 +99,7 @@ public class MolecularDistillationTowerMenu extends AbstractContainerMenu {
         return data;
     }
 
-    public MolecularDistillationTowerBlockEntity getBlockEntity() {
+    public DryerBlockEntity getBlockEntity() {
         return blockEntity;
     }
 }

@@ -23,7 +23,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.fuzhou.fuzhouplan.Fuzhouplan;
-import org.fuzhou.fuzhouplan.menu.MolecularDistillationTowerMenu;
+import org.fuzhou.fuzhouplan.menu.DryerMenu;
 import org.fuzhou.fuzhouplan.recipe.MachineRecipe;
 import org.fuzhou.fuzhouplan.recipe.ModRecipeTypes;
 
@@ -31,15 +31,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class MolecularDistillationTowerBlockEntity extends BlockEntity implements MenuProvider {
+public class DryerBlockEntity extends BlockEntity implements MenuProvider {
 
-    public static final int DEFAULT_ENERGY_PER_OPERATION = 1000;
-    public static final int DEFAULT_PROCESSING_TIME = 200;
-    public static final int MAX_ENERGY = 100000;
+    public static final int DEFAULT_ENERGY_PER_OPERATION = 400;
+    public static final int DEFAULT_PROCESSING_TIME = 300;
+    public static final int MAX_ENERGY = 50000;
 
     public static final int INPUT_SLOT = 0;
-    public static final int OUTPUT_SLOT = 1;
-    public static final int SLOT_COUNT = 2;
+    public static final int OUTPUT_SLOT_1 = 1;
+    public static final int OUTPUT_SLOT_2 = 2;
+    public static final int SLOT_COUNT = 3;
 
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
@@ -52,7 +53,7 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
             if (slot == INPUT_SLOT) {
                 return true;
             }
-            return slot == OUTPUT_SLOT;
+            return slot == OUTPUT_SLOT_1 || slot == OUTPUT_SLOT_2;
         }
     };
 
@@ -65,8 +66,8 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
     private boolean isProcessing = false;
     private MachineRecipe currentRecipe = null;
 
-    public MolecularDistillationTowerBlockEntity(BlockPos pos, BlockState state) {
-        super(Fuzhouplan.MOLECULAR_DISTILLATION_TOWER_ENTITY.get(), pos, state);
+    public DryerBlockEntity(BlockPos pos, BlockState state) {
+        super(Fuzhouplan.DRYER_ENTITY.get(), pos, state);
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -109,17 +110,26 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
 
         SimpleContainer inputContainer = new SimpleContainer(inputStack);
         Optional<MachineRecipe> recipeOpt = level.getRecipeManager()
-                .getRecipeFor(ModRecipeTypes.DISTILLING.get(), inputContainer, level);
+                .getRecipeFor(ModRecipeTypes.DRYING.get(), inputContainer, level);
 
         if (recipeOpt.isEmpty()) return false;
 
         MachineRecipe recipe = recipeOpt.get();
-        ItemStack output = recipe.getPrimaryOutput();
+        ItemStack primaryOutput = recipe.getPrimaryOutput();
+        ItemStack secondaryOutput = recipe.getSecondaryOutput();
 
-        ItemStack outputStack = itemHandler.getStackInSlot(OUTPUT_SLOT);
-        if (!outputStack.isEmpty()) {
-            if (!ItemStack.isSameItemSameTags(outputStack, output)) return false;
-            if (outputStack.getCount() + output.getCount() > outputStack.getMaxStackSize()) return false;
+        ItemStack output1 = itemHandler.getStackInSlot(OUTPUT_SLOT_1);
+        if (!output1.isEmpty()) {
+            if (!ItemStack.isSameItemSameTags(output1, primaryOutput)) return false;
+            if (output1.getCount() + primaryOutput.getCount() > output1.getMaxStackSize()) return false;
+        }
+
+        if (recipe.hasSecondaryOutput()) {
+            ItemStack output2 = itemHandler.getStackInSlot(OUTPUT_SLOT_2);
+            if (!output2.isEmpty()) {
+                if (!ItemStack.isSameItemSameTags(output2, secondaryOutput)) return false;
+                if (output2.getCount() + secondaryOutput.getCount() > output2.getMaxStackSize()) return false;
+            }
         }
 
         int energyCost = recipe.getEnergyCost();
@@ -134,12 +144,22 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
 
         itemHandler.extractItem(INPUT_SLOT, 1, false);
 
-        ItemStack output = currentRecipe.getPrimaryOutput();
-        ItemStack outputStack = itemHandler.getStackInSlot(OUTPUT_SLOT);
-        if (outputStack.isEmpty()) {
-            itemHandler.setStackInSlot(OUTPUT_SLOT, output.copy());
+        ItemStack primaryOutput = currentRecipe.getPrimaryOutput();
+        ItemStack output1 = itemHandler.getStackInSlot(OUTPUT_SLOT_1);
+        if (output1.isEmpty()) {
+            itemHandler.setStackInSlot(OUTPUT_SLOT_1, primaryOutput.copy());
         } else {
-            outputStack.grow(output.getCount());
+            output1.grow(primaryOutput.getCount());
+        }
+
+        if (currentRecipe.hasSecondaryOutput()) {
+            ItemStack secondaryOutput = currentRecipe.getSecondaryOutput();
+            ItemStack output2 = itemHandler.getStackInSlot(OUTPUT_SLOT_2);
+            if (output2.isEmpty()) {
+                itemHandler.setStackInSlot(OUTPUT_SLOT_2, secondaryOutput.copy());
+            } else {
+                output2.grow(secondaryOutput.getCount());
+            }
         }
     }
 
@@ -213,11 +233,11 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         @Override
         public int get(int index) {
             return switch (index) {
-                case 0 -> MolecularDistillationTowerBlockEntity.this.processingProgress;
+                case 0 -> DryerBlockEntity.this.processingProgress;
                 case 1 -> currentRecipe != null ? currentRecipe.getProcessingTime() : syncedProcessingTime;
-                case 2 -> MolecularDistillationTowerBlockEntity.this.getEnergyStored();
-                case 3 -> MolecularDistillationTowerBlockEntity.this.MAX_ENERGY;
-                case 4 -> MolecularDistillationTowerBlockEntity.this.isProcessing ? 1 : 0;
+                case 2 -> DryerBlockEntity.this.getEnergyStored();
+                case 3 -> DryerBlockEntity.this.MAX_ENERGY;
+                case 4 -> DryerBlockEntity.this.isProcessing ? 1 : 0;
                 default -> 0;
             };
         }
@@ -225,11 +245,11 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case 0 -> MolecularDistillationTowerBlockEntity.this.processingProgress = value;
+                case 0 -> DryerBlockEntity.this.processingProgress = value;
                 case 1 -> syncedProcessingTime = value;
                 case 2 -> energyStorage.setEnergyStored(value);
                 case 3 -> { }
-                case 4 -> MolecularDistillationTowerBlockEntity.this.isProcessing = value != 0;
+                case 4 -> DryerBlockEntity.this.isProcessing = value != 0;
             }
         }
 
@@ -250,13 +270,13 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.fuzhouplan.molecular_distillation_tower");
+        return Component.translatable("block.fuzhouplan.dryer");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return new MolecularDistillationTowerMenu(containerId, inventory, this);
+        return new DryerMenu(containerId, inventory, this);
     }
 
     private IItemHandler createSidedHandler() {
@@ -279,7 +299,7 @@ public class MolecularDistillationTowerBlockEntity extends BlockEntity implement
 
             @Override
             public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                if (slot != OUTPUT_SLOT) return ItemStack.EMPTY;
+                if (slot != OUTPUT_SLOT_1 && slot != OUTPUT_SLOT_2) return ItemStack.EMPTY;
                 return itemHandler.extractItem(slot, amount, simulate);
             }
 
