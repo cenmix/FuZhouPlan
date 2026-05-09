@@ -4,8 +4,11 @@
 **Minecraft**: 1.20.1  
 **Forge**: 47.x  
 **作者**: FuZhou
+
 **包名**: `org.fuzhou.fuzhouplan`
+
 **模组ID**: `fuzhouplan`
+
 **Forge版本**: 47.4.10
 
 浮舟计划 (FuZhouPlan) 是一款 Minecraft Java Edition Forge 1.20.1 模组，以 生物基因科技 和 工业电力科技 为主要玩法。
