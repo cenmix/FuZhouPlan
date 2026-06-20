@@ -23,33 +23,11 @@ public class ModRecipeTypes {
                 }
             });
 
-    public static final RegistryObject<RecipeType<MachineRecipe>> DISTILLING =
-            RECIPE_TYPES.register("distilling", () -> new RecipeType<MachineRecipe>() {
-                @Override
-                public String toString() {
-                    return Fuzhouplan.MODID + ":distilling";
-                }
-            });
-
-    public static final RegistryObject<RecipeType<MachineRecipe>> FERMENTING =
-            RECIPE_TYPES.register("fermenting", () -> new RecipeType<MachineRecipe>() {
-                @Override
-                public String toString() {
-                    return Fuzhouplan.MODID + ":fermenting";
-                }
-            });
-
     public static final RegistryObject<RecipeSerializer<MachineRecipe>> DRYING_SERIALIZER =
             SERIALIZERS.register("drying", () -> new MachineRecipe.Serializer(DRYING.get()));
-    public static final RegistryObject<RecipeSerializer<MachineRecipe>> DISTILLING_SERIALIZER =
-            SERIALIZERS.register("distilling", () -> new MachineRecipe.Serializer(DISTILLING.get()));
-    public static final RegistryObject<RecipeSerializer<MachineRecipe>> FERMENTING_SERIALIZER =
-            SERIALIZERS.register("fermenting", () -> new MachineRecipe.Serializer(FERMENTING.get()));
 
     public static RecipeSerializer<?> getSerializerForType(RecipeType<?> type) {
         if (type == DRYING.get()) return DRYING_SERIALIZER.get();
-        if (type == DISTILLING.get()) return DISTILLING_SERIALIZER.get();
-        if (type == FERMENTING.get()) return FERMENTING_SERIALIZER.get();
         return null;
     }
 }

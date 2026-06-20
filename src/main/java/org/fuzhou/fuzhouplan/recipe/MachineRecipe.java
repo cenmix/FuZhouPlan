@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 
-public class MachineRecipe implements Recipe<Container> {
+public class   MachineRecipe implements Recipe<Container> {
 
     private final ResourceLocation id;
     private final RecipeType<MachineRecipe> type;

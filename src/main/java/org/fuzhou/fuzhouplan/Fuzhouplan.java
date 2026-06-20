@@ -11,7 +11,6 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.block.Block;
@@ -35,23 +34,12 @@ import org.fuzhou.fuzhouplan.item.DNACanItem;
 import org.fuzhou.fuzhouplan.item.UnresolvedDNACanItem;
 import org.fuzhou.fuzhouplan.block.GreenBerryBushBlock;
 import org.fuzhou.fuzhouplan.block.BlueBerryBushBlock;
-import org.fuzhou.fuzhouplan.block.FermentationBarrelBlock;
-import org.fuzhou.fuzhouplan.block.MolecularDistillationTowerBlock;
-import org.fuzhou.fuzhouplan.block.PrecisionStirrerBlock;
+
 import org.fuzhou.fuzhouplan.block.DryerBlock;
 import org.fuzhou.fuzhouplan.block.InfiniteGeneratorBlock;
-import org.fuzhou.fuzhouplan.block.ResolverBlock;
-import org.fuzhou.fuzhouplan.blockentity.FermentationBarrelBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.InfiniteGeneratorBlockEntity;
-import org.fuzhou.fuzhouplan.blockentity.MolecularDistillationTowerBlockEntity;
-import org.fuzhou.fuzhouplan.blockentity.PrecisionStirrerBlockEntity;
 import org.fuzhou.fuzhouplan.blockentity.DryerBlockEntity;
-import org.fuzhou.fuzhouplan.blockentity.ResolverBlockEntity;
-import org.fuzhou.fuzhouplan.menu.PrecisionStirrerMenu;
-import org.fuzhou.fuzhouplan.menu.FermentationBarrelMenu;
-import org.fuzhou.fuzhouplan.menu.MolecularDistillationTowerMenu;
 import org.fuzhou.fuzhouplan.menu.DryerMenu;
-import org.fuzhou.fuzhouplan.menu.ResolverMenu;
 import org.fuzhou.fuzhouplan.network.NetworkHandler;
 import org.fuzhou.fuzhouplan.recipe.ModRecipeTypes;
 import net.minecraft.world.level.block.Blocks;
@@ -76,11 +64,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.network.chat.Component;
-import org.fuzhou.fuzhouplan.client.gui.PrecisionStirrerScreen;
-import org.fuzhou.fuzhouplan.client.gui.FermentationBarrelScreen;
-import org.fuzhou.fuzhouplan.client.gui.MolecularDistillationTowerScreen;
 import org.fuzhou.fuzhouplan.client.gui.DryerScreen;
-import org.fuzhou.fuzhouplan.client.gui.ResolverScreen;
 import org.slf4j.Logger;
 
 @Mod(Fuzhouplan.MODID)
@@ -144,37 +128,6 @@ public class Fuzhouplan {
     
     // DNA储存罐物品通过DNACanRegistry动态注册
 
-    // Task 5: 发酵桶
-    public static final RegistryObject<Block> FERMENTATION_BARREL = BLOCKS.register("fermentation_barrel", 
-            () -> new FermentationBarrelBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5f).sound(net.minecraft.world.level.block.SoundType.WOOD)));
-    public static final RegistryObject<Item> FERMENTATION_BARREL_ITEM = ITEMS.register("fermentation_barrel", 
-            () -> new BlockItem(FERMENTATION_BARREL.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<FermentationBarrelBlockEntity>> FERMENTATION_BARREL_ENTITY = BLOCK_ENTITIES.register("fermentation_barrel",
-            () -> BlockEntityType.Builder.of(FermentationBarrelBlockEntity::new, FERMENTATION_BARREL.get()).build(null));
-
-    // Task 6: 分子蒸馏塔
-    public static final RegistryObject<Block> MOLECULAR_DISTILLATION_TOWER = BLOCKS.register("molecular_distillation_tower",
-            () -> new MolecularDistillationTowerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f).sound(net.minecraft.world.level.block.SoundType.METAL)));
-    public static final RegistryObject<Item> MOLECULAR_DISTILLATION_TOWER_ITEM = ITEMS.register("molecular_distillation_tower",
-            () -> new BlockItem(MOLECULAR_DISTILLATION_TOWER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<MolecularDistillationTowerBlockEntity>> MOLECULAR_DISTILLATION_TOWER_ENTITY = BLOCK_ENTITIES.register("molecular_distillation_tower",
-            () -> BlockEntityType.Builder.of(MolecularDistillationTowerBlockEntity::new, MOLECULAR_DISTILLATION_TOWER.get()).build(null));
-
-    // Task 7: 精密搅拌器
-    public static final RegistryObject<Block> PRECISION_STIRRER = BLOCKS.register("precision_stirrer",
-            () -> new PrecisionStirrerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0f).sound(net.minecraft.world.level.block.SoundType.METAL)));
-    public static final RegistryObject<Item> PRECISION_STIRRER_ITEM = ITEMS.register("precision_stirrer",
-            () -> new BlockItem(PRECISION_STIRRER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<PrecisionStirrerBlockEntity>> PRECISION_STIRRER_ENTITY = BLOCK_ENTITIES.register("precision_stirrer",
-            () -> BlockEntityType.Builder.of(PrecisionStirrerBlockEntity::new, PRECISION_STIRRER.get()).build(null));
-    public static final RegistryObject<MenuType<PrecisionStirrerMenu>> PRECISION_STIRRER_MENU = MENUS.register("precision_stirrer",
-            () -> IForgeMenuType.create(PrecisionStirrerMenu::new));
-
-    public static final RegistryObject<MenuType<FermentationBarrelMenu>> FERMENTATION_BARREL_MENU = MENUS.register("fermentation_barrel",
-            () -> IForgeMenuType.create(FermentationBarrelMenu::new));
-
-    public static final RegistryObject<MenuType<MolecularDistillationTowerMenu>> MOLECULAR_DISTILLATION_TOWER_MENU = MENUS.register("molecular_distillation_tower",
-            () -> IForgeMenuType.create(MolecularDistillationTowerMenu::new));
 
     // 烘干机
     public static final RegistryObject<Block> DRYER = BLOCKS.register("dryer",
@@ -186,15 +139,6 @@ public class Fuzhouplan {
     public static final RegistryObject<MenuType<DryerMenu>> DRYER_MENU = MENUS.register("dryer",
             () -> IForgeMenuType.create(DryerMenu::new));
 
-    // 解析器
-    public static final RegistryObject<Block> RESOLVER = BLOCKS.register("resolver",
-            () -> new ResolverBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f).sound(net.minecraft.world.level.block.SoundType.METAL)));
-    public static final RegistryObject<Item> RESOLVER_ITEM = ITEMS.register("resolver",
-            () -> new BlockItem(RESOLVER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<ResolverBlockEntity>> RESOLVER_ENTITY = BLOCK_ENTITIES.register("resolver",
-            () -> BlockEntityType.Builder.of(ResolverBlockEntity::new, RESOLVER.get()).build(null));
-    public static final RegistryObject<MenuType<ResolverMenu>> RESOLVER_MENU = MENUS.register("resolver",
-            () -> IForgeMenuType.create(ResolverMenu::new));
 
     // 无限发电机
     public static final RegistryObject<Block> INFINITE_GENERATOR = BLOCKS.register("infinite_generator",
@@ -234,16 +178,8 @@ public class Fuzhouplan {
         for (DNACanItem item : DNACanRegistry.getAllResolvedCans().values()) {
             output.accept(item);
         }
-        // Task 5: 发酵桶
-        output.accept(FERMENTATION_BARREL_ITEM.get());
-        // Task 6: 分子蒸馏塔
-        output.accept(MOLECULAR_DISTILLATION_TOWER_ITEM.get());
-        // Task 7: 精密搅拌器
-        output.accept(PRECISION_STIRRER_ITEM.get());
         // 烘干机
         output.accept(DRYER_ITEM.get());
-        // 解析器
-        output.accept(RESOLVER_ITEM.get());
         // 无限发电机
         output.accept(INFINITE_GENERATOR_ITEM.get());
     }).build());
@@ -293,11 +229,7 @@ public class Fuzhouplan {
                 ItemBlockRenderTypes.setRenderLayer(GLOWING_BLUE_DYE_FLOWING.get(), RenderType.translucent());
                 ItemBlockRenderTypes.setRenderLayer(GREEN_ANESTHETIC_SOURCE.get(), RenderType.translucent());
                 ItemBlockRenderTypes.setRenderLayer(GREEN_ANESTHETIC_FLOWING.get(), RenderType.translucent());
-                MenuScreens.register(PRECISION_STIRRER_MENU.get(), PrecisionStirrerScreen::new);
-                MenuScreens.register(FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
-                MenuScreens.register(MOLECULAR_DISTILLATION_TOWER_MENU.get(), MolecularDistillationTowerScreen::new);
                 MenuScreens.register(DRYER_MENU.get(), DryerScreen::new);
-                MenuScreens.register(RESOLVER_MENU.get(), ResolverScreen::new);
             });
         }
     }
